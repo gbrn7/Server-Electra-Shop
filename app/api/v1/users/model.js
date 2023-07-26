@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { model, Schema } = mongoose;
 const bcrypt = require('bcrypt');
 
-const userModel = Schema({
+const userModel = new Schema({
   name: {
     type: String,
     required: [true, "The name is required"],

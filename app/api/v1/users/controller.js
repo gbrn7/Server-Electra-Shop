@@ -1,12 +1,39 @@
-const { createUsers, activateUser } = require('../../../services/mongoose/users');
+const { activateUser, signInUser, signUpUser, createAdmin } = require('../../../services/mongoose/users');
 const { StatusCodes } = require('http-status-codes');
 
 //create function
-const create = async (req, res, next) => {
+const signUp = async (req, res, next) => {
   try {
 
-    const result = await createUsers(req);
+    const result = await signUpUser(req);
 
+    res.status(StatusCodes.CREATED).json({
+      data: result,
+    });
+
+  } catch (error) {
+    next(error);
+  }
+}
+
+const signIn = async (req, res, next) => {
+  try {
+    const result = await signInUser(req);
+
+    res.status(StatusCodes.OK).json({
+      data: result,
+    });
+
+  } catch (error) {
+    next(error);
+  }
+}
+
+
+const createCmsAdmin = async (req, res, next) => {
+  try {
+
+    const result = await createAdmin(req);
     res.status(StatusCodes.CREATED).json({
       data: result,
     });
@@ -30,6 +57,8 @@ const activeUser = async (req, res, next) => {
 
 }
 module.exports = {
-  create,
-  activeUser
+  signUp,
+  signIn,
+  activeUser,
+  createCmsAdmin,
 }

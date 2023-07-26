@@ -10,10 +10,15 @@ var app = express();
 
 //router
 const usersRouter = require('./app/api/v1/users/router');
+const usersRefreshToken = require('./app/api/v1/userRefreshToken/router');
 
 
 //make variable v1
 const v1 = '/api/v1'
+
+// middlewares handle error
+const notFoundMiddleware = require('./app/middlewares/not-found');
+const handleErrorMiddleware = require('./app/middlewares/handler-error');
 
 
 
@@ -33,25 +38,13 @@ app.get('/', (req, res) => {
 // console.log('first');
 
 app.use(`${v1}`, usersRouter);
+app.use(`${v1}`, usersRefreshToken);
 
 // console.log('second')
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  next(createError(404));
-  console.log('error');
-});
+app.use(notFoundMiddleware);
 
 // error handler
-app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  console.log('error');
-  console.log(err);
-  res.json(err);
-});
+app.use(handleErrorMiddleware);
 
 module.exports = app;

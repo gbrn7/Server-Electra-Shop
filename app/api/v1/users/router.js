@@ -1,5 +1,5 @@
 const express = require('express');
-const { create, activeUser } = require('./controller');
+const { activeUser, signUp, signIn, createCmsAdmin } = require('./controller');
 const router = express();
 
 router.get('/users', (req, res) => {
@@ -18,8 +18,11 @@ router.get('/users', (req, res) => {
   })
 });
 
-router.post('/users', create);
+router.post('/users/auth/signup', signUp);
 
+router.post('/users/auth/signin', signIn);
+
+router.post('/users/admin/create', createCmsAdmin);
 
 router.put('/active', activeUser);
 
