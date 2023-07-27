@@ -244,6 +244,40 @@ const getAllUser = async (req) => {
   return { users: rawResult, pages: Math.ceil(countUsers / limit), total: countUsers, page: page };
 }
 
+const getAllAdmin = async (req) => {
+  const { keyword, status, limit, page } = req.query;
+
+  let condition = {
+    $or: [
+      { role: 'admin' },
+      { role: 'superAdmin' },
+    ],
+  };
+
+  if (keyword) {
+    condition = { ...condition, name: { $regex: keyword, $options: 'i' } }
+  }
+  if (status) {
+    condition = { ...condition, status: { $regex: status, $options: 'i' } }
+  }
+
+  const rawResult = await Users.find(condition)
+    .select({ password: 0, otp: 0 })
+    .limit(limit)
+    .skip(limit * (page - 1));
+
+  if (!rawResult || rawResult.length === 0) throw new NotFoundError('User not Found');
+
+  countUsers = await Users.countDocuments({
+    $or: [
+      { role: 'admin' },
+      { role: 'superAdmin' },
+    ],
+  });
+
+  return { users: rawResult, pages: Math.ceil(countUsers / limit), total: countUsers, page: page };
+}
+
 module.exports = {
   signUpUser,
   activateUser,
@@ -252,4 +286,5 @@ module.exports = {
   signInAdmin,
   updateDataUsers,
   getAllUser,
+  getAllAdmin,
 }

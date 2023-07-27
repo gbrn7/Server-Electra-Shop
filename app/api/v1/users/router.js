@@ -1,7 +1,8 @@
 const express = require('express');
-const { activeUser, signUp, signIn, createCmsAdmin, signInCmsAdmin, updateUser, getUsers } = require('./controller');
+const { activeUser, signUp, signIn, createCmsAdmin, signInCmsAdmin, updateUser, getUsers, getAdmins } = require('./controller');
 const router = express();
 
+//user Authorization
 router.get('/users', getUsers);
 
 router.post('/users/auth/signup', signUp);
@@ -9,6 +10,9 @@ router.post('/users/auth/signup', signUp);
 router.post('/users/auth/signin', signIn);
 
 router.put('/users/:id', updateUser);
+
+//Admin Authorization
+router.get('/admins', getAdmins);
 
 router.post('/users/admin/create', createCmsAdmin);
 
