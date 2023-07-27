@@ -5,6 +5,7 @@ const createRandomOtp = require('../../utils/createRandomOTP');
 const deleteSecretCredentials = require('../../utils/deleteSecretCredentials');
 const { createUserRefreshToken } = require('./refreshToken');
 
+//User Authorization
 const signUpUser = async (req) => {
   const {
     name,
@@ -103,6 +104,7 @@ const activateUser = async (req) => {
   return result;
 }
 
+//admin Authorization
 const createAdmin = async (req) => {
   const {
     name,
@@ -261,12 +263,12 @@ const getAllAdmin = async (req) => {
     condition = { ...condition, status: { $regex: status, $options: 'i' } }
   }
 
-  const rawResult = await Users.find(condition)
+  const result = await Users.find(condition)
     .select({ password: 0, otp: 0 })
     .limit(limit)
     .skip(limit * (page - 1));
 
-  if (!rawResult || rawResult.length === 0) throw new NotFoundError('User not Found');
+  if (!result || result.length === 0) throw new NotFoundError('User not Found');
 
   countUsers = await Users.countDocuments({
     $or: [
@@ -275,7 +277,22 @@ const getAllAdmin = async (req) => {
     ],
   });
 
-  return { users: rawResult, pages: Math.ceil(countUsers / limit), total: countUsers, page: page };
+  return { users: result, pages: Math.ceil(countUsers / limit), total: countUsers, page: page };
+}
+
+const getCountUsers = async (req) => {
+  const { role } = req.query;
+
+  let condition;
+  if (role) {
+    condition = { role: role }
+  }
+
+  const result = Users.countDocuments(condition);
+
+  if (!result) throw new NotFoundError('Users not found');
+
+  return result;
 }
 
 module.exports = {
@@ -287,4 +304,5 @@ module.exports = {
   updateDataUsers,
   getAllUser,
   getAllAdmin,
+  getCountUsers,
 }
