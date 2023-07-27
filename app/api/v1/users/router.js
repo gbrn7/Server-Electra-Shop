@@ -1,5 +1,5 @@
 const express = require('express');
-const { activeUser, signUp, signIn, createCmsAdmin, signInCmsAdmin, updateUser, getUsers, getAdmins, countUsers } = require('./controller');
+const { activeUser, signUp, signIn, createCmsAdmin, signInCmsAdmin, updateUser, getUsers, getAdmins, countUsers, getDataUser } = require('./controller');
 const { authenticateUser, authorizeRoles } = require('../../../middlewares/auth');
 const router = express();
 
@@ -9,6 +9,8 @@ router.post('/users/auth/signup', signUp);
 router.post('/users/auth/signin', signIn);
 
 router.put('/active', activeUser);
+
+router.get('/users/:id', authenticateUser, authorizeRoles('user'), getDataUser);
 
 router.put('/users/:id', authenticateUser, authorizeRoles('user'), updateUser);
 

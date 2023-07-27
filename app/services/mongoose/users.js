@@ -104,6 +104,18 @@ const activateUser = async (req) => {
   return result;
 }
 
+const getDetailsUser = async (req) => {
+  const { id } = req.params;
+
+  const rawResult = await Users.findOne({ _id: id });
+
+  if (!rawResult) throw new NotFoundError(`user with id ${_id}`);
+
+  const result = deleteSecretCredentials(rawResult);
+
+  return result;
+}
+
 //admin Authorization
 const createAdmin = async (req) => {
   const {
@@ -297,8 +309,9 @@ const getCountUsers = async (req) => {
 
 module.exports = {
   signUpUser,
-  activateUser,
   signInUser,
+  activateUser,
+  getDetailsUser,
   createAdmin,
   signInAdmin,
   updateDataUsers,
