@@ -109,7 +109,8 @@ const getDetailsUser = async (req) => {
 
   const rawResult = await Users.findOne({ _id: id });
 
-  if (!rawResult) throw new NotFoundError(`user with id ${_id}`);
+
+  if (!rawResult) throw new NotFoundError(`user with id ${id} not found`);
 
   const result = deleteSecretCredentials(rawResult);
 
@@ -162,6 +163,23 @@ const createAdmin = async (req) => {
 
   return result;
 
+}
+
+const getDetailsAdmin = async (req) => {
+  const { id } = req.params;
+
+  const rawResult = await Users.findOne({
+    _id: id, $or: [
+      { role: 'admin' },
+      { role: 'superAdmin' },
+    ]
+  });
+
+  if (!rawResult) throw new NotFoundError(`admin with id ${id}`);
+
+  const result = deleteSecretCredentials(rawResult);
+
+  return result;
 }
 
 const signInAdmin = async (req) => {
@@ -318,4 +336,5 @@ module.exports = {
   getAllUser,
   getAllAdmin,
   getCountUsers,
+  getDetailsAdmin,
 }

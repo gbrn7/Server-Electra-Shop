@@ -1,5 +1,5 @@
 const express = require('express');
-const { activeUser, signUp, signIn, createCmsAdmin, signInCmsAdmin, updateUser, getUsers, getAdmins, countUsers, getDataUser } = require('./controller');
+const { activeUser, signUp, signIn, createCmsAdmin, signInCmsAdmin, updateUser, getUsers, getAdmins, countUsers, getDataUser, getDataAdmin } = require('./controller');
 const { authenticateUser, authorizeRoles } = require('../../../middlewares/auth');
 const router = express();
 
@@ -15,14 +15,16 @@ router.get('/users/:id', authenticateUser, authorizeRoles('user'), getDataUser);
 router.put('/users/:id', authenticateUser, authorizeRoles('user'), updateUser);
 
 //Admin Authorization
-router.post('/admin/auth/signin', signInCmsAdmin);
+router.post('/admins/auth/signin', signInCmsAdmin);
 
 router.get('/users', authenticateUser, authorizeRoles('superAdmin', 'admin'), getUsers);
+
+router.get('/admins/:id', authenticateUser, authorizeRoles('superAdmin', 'admin'), getDataAdmin);
 
 router.get('/admins', authenticateUser, authorizeRoles('superAdmin'), getAdmins);
 
 router.get('/admins/Count', authenticateUser, authorizeRoles('superAdmin', 'admin'), countUsers);
 
-router.post('/users/admin/create', authenticateUser, authorizeRoles('superAdmin'), createCmsAdmin);
+router.post('/users/admins/create', authenticateUser, authorizeRoles('superAdmin'), createCmsAdmin);
 
 module.exports = router;
