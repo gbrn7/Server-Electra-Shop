@@ -117,6 +117,33 @@ const getDetailsUser = async (req) => {
   return result;
 }
 
+const updateDataUser = async (req) => {
+  const { id } = req.params;
+  const {
+    name,
+    email,
+    address,
+    phone_num } = req.body;
+
+  const checkId = await Users.findOne({
+    _id: id,
+  })
+
+  if (!checkId) throw new NotFoundError(`the user with id ${id} not found`);
+
+  let rawResult = await Users.findByIdAndUpdate(id, {
+    name,
+    email,
+    address,
+    phone_num,
+  }, { new: true, runValidators: true });
+
+
+  const result = deleteSecretCredentials(rawResult);
+
+  return result;
+}
+
 //admin Authorization
 const createAdmin = async (req) => {
   const {
@@ -225,8 +252,9 @@ const signInAdmin = async (req) => {
 
 }
 
-const updateDataUsers = async (req) => {
+const updateDataAdmin = async (req) => {
   const { id } = req.params;
+
   const {
     name,
     email,
@@ -235,9 +263,15 @@ const updateDataUsers = async (req) => {
 
   const checkId = await Users.findOne({
     _id: id,
+    $or: [
+      { role: 'admin' },
+      { role: 'superAdmin' }
+    ],
   })
 
   if (!checkId) throw new NotFoundError(`the user with id ${id} not found`);
+
+  if (req.user.role === 'admin' && req.user._id !== id) throw new UnauthorizedError('Unauthorized to access this route');
 
   let rawResult = await Users.findByIdAndUpdate(id, {
     name,
@@ -331,8 +365,9 @@ module.exports = {
   activateUser,
   getDetailsUser,
   createAdmin,
+  updateDataUser,
   signInAdmin,
-  updateDataUsers,
+  updateDataAdmin,
   getAllUser,
   getAllAdmin,
   getCountUsers,

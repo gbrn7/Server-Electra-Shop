@@ -17,13 +17,25 @@ const authenticateUser = async (req, res, next) => {
     const payload = isTokenValid({ token });
 
     //Attach user data to req object
-    req.user = {
-      name: payload.name,
-      role: payload.role,
-      email: payload.email,
-      address: payload.address,
-      status: payload.status,
-      phone_num: payload.phone_num,
+    if (payload.role === 'user') {
+      req.user = {
+        name: payload.name,
+        role: payload.role,
+        email: payload.email,
+        address: payload.address,
+        status: payload.status,
+        phone_num: payload.phone_num,
+      }
+    } else {
+      req.user = {
+        _id: payload.userId,
+        name: payload.name,
+        role: payload.role,
+        email: payload.email,
+        address: payload.address,
+        status: payload.status,
+        phone_num: payload.phone_num,
+      }
     }
 
     //head to next function with new req

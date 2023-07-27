@@ -1,5 +1,5 @@
 const express = require('express');
-const { activeUser, signUp, signIn, createCmsAdmin, signInCmsAdmin, updateUser, getUsers, getAdmins, countUsers, getDataUser, getDataAdmin } = require('./controller');
+const { activeUser, signUp, signIn, createCmsAdmin, signInCmsAdmin, updateUser, getUsers, getAdmins, countUsers, getDataUser, getDataAdmin, updateAdmin } = require('./controller');
 const { authenticateUser, authorizeRoles } = require('../../../middlewares/auth');
 const router = express();
 
@@ -20,6 +20,8 @@ router.post('/admins/auth/signin', signInCmsAdmin);
 router.get('/users', authenticateUser, authorizeRoles('superAdmin', 'admin'), getUsers);
 
 router.get('/admins/:id', authenticateUser, authorizeRoles('superAdmin', 'admin'), getDataAdmin);
+
+router.put('/admins/:id', authenticateUser, authorizeRoles('admin', 'superAdmin'), updateAdmin);
 
 router.get('/admins', authenticateUser, authorizeRoles('superAdmin'), getAdmins);
 
