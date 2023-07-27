@@ -1,7 +1,8 @@
 const Users = require('../../api/v1/users/model');
-const { BadRequestError, UnauthorizedError, UnauthenticatedError } = require('../../errors');
+const { BadRequestError, UnauthorizedError, UnauthenticatedError, NotFoundError } = require('../../errors');
 const { createJWT, createTokenUser, createRefreshJWT } = require('../../utils');
 const createRandomOtp = require('../../utils/createRandomOTP');
+const deleteSecretCredentials = require('../../utils/deleteSecretCredentials');
 const { createUserRefreshToken } = require('./refreshToken');
 
 const signUpUser = async (req) => {
@@ -12,25 +13,25 @@ const signUpUser = async (req) => {
     address,
     phone_num } = req.body;
 
-  let result = await Users.findOne({
+  let rawResult = await Users.findOne({
     email,
     status: 'not active',
   });
 
   const randomOtp = createRandomOtp();
 
-  if (result) {
-    result.name = name;
-    result.role = 'user';
-    result.email = email;
-    result.address = address;
-    result.password = password;
-    result.otp = randomOtp;
-    result.phone_num = phone_num;
+  if (rawResult) {
+    rawResult.name = name;
+    rawResult.role = 'user';
+    rawResult.email = email;
+    rawResult.address = address;
+    rawResult.password = password;
+    rawResult.otp = randomOtp;
+    rawResult.phone_num = phone_num;
 
-    await result.save();
+    await rawResult.save();
   } else {
-    result = await Users.create({
+    rawResult = await Users.create({
       name,
       email,
       role: 'user',
@@ -41,8 +42,7 @@ const signUpUser = async (req) => {
     })
   }
 
-  delete result._doc.password;
-  delete result._doc.otp;
+  const result = deleteSecretCredentials(rawResult);
 
   return result;
 }
@@ -54,28 +54,23 @@ const signInUser = async (req) => {
   //above code will pass badRequestError class that extend error class
   // the execution will passes control to catch block and will checked in function that receive err argument 
 
-  const result = await Users.findOne({ email });
+  const rawResult = await Users.findOne({ email });
 
-  if (!result) throw new UnauthorizedError("your email is'nt registered");
+  if (!rawResult) throw new UnauthorizedError("your email is'nt registered");
 
-  if (result.status === 'not active') {
+  if (rawResult.status === 'not active') {
     throw new UnauthorizedError("your email is not yet active");
   }
 
-  const isPasswordValid = await result.comparePassword(password);
+  const isPasswordValid = await rawResult.comparePassword(password);
 
   if (!isPasswordValid) throw new UnauthenticatedError("Invalid Credentials");
 
-  delete result._doc.password;
-  delete result._doc.otp;
-
-
+  const result = deleteSecretCredentials(rawResult);
 
   const token = createJWT({ payload: createTokenUser(result) });
 
   const refreshToken = createRefreshJWT(createTokenUser(result));
-  // const token = createTokenUser(result);
-
 
   //create refresh token record to db
   await createUserRefreshToken({
@@ -96,15 +91,14 @@ const activateUser = async (req) => {
 
   if (!check && check.otp !== otp) return 'your otp code invalid'
 
-  const result = await Users.findByIdAndUpdate(check._id, {
+  const rawResult = await Users.findByIdAndUpdate(check._id, {
     status: 'active'
   }, { new: true, runValidators: true })
 
   //if new true, return the modified document rather than the original
   //if runValidators true, if true, return the modified document rather than the original
 
-  delete result._doc.password;
-  delete result._doc.otp;
+  const result = deleteSecretCredentials(rawResult);
 
   return result;
 }
@@ -119,26 +113,26 @@ const createAdmin = async (req) => {
     role
   } = req.body;
 
-  let result = await Users.findOne({
+  let rawResult = await Users.findOne({
     email,
     status: 'not active',
   });
 
   const randomOtp = createRandomOtp();
 
-  if (result) {
-    result.name = name;
-    result.role = role;
-    result.email = email;
-    result.password = password;
-    result.address = address;
-    result.status = 'active';
-    result.otp = randomOtp;
-    result.phone_num = phone_num;
+  if (rawResult) {
+    rawResult.name = name;
+    rawResult.role = role;
+    rawResult.email = email;
+    rawResult.password = password;
+    rawResult.address = address;
+    rawResult.status = 'active';
+    rawResult.otp = randomOtp;
+    rawResult.phone_num = phone_num;
 
-    await result.save();
+    await rawResult.save();
   } else {
-    result = await Users.create({
+    rawResult = await Users.create({
       name,
       role,
       email,
@@ -150,17 +144,112 @@ const createAdmin = async (req) => {
     })
   }
 
-  delete result._doc.password;
-  delete result._doc.otp;
+  const result = deleteSecretCredentials(rawResult);
 
   return result;
 
 }
 
+const signInAdmin = async (req) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) throw new BadRequestError("Please Fill email and password field");
+  //above code will pass badRequestError class that extend error class
+  // the execution will passes control to catch block and will checked in function that receive err argument 
+
+  const rawResult = await Users.findOne({
+    email,
+    $or: [
+      { role: 'admin' },
+      { role: 'superAdmin' }
+    ]
+  });
+
+  if (!rawResult) throw new UnauthorizedError("your email is'nt registered");
+
+  if (rawResult.status === 'not active') {
+    throw new UnauthorizedError("your email is not yet active");
+  }
+
+  const isPasswordValid = await rawResult.comparePassword(password);
+
+  const result = deleteSecretCredentials(rawResult);
+
+  if (!isPasswordValid) throw new UnauthenticatedError("Invalid Credentials");
+
+  const token = createJWT({ payload: createTokenUser(result) });
+
+  const refreshToken = createRefreshJWT(createTokenUser(result));
+  // const token = createTokenUser(result);
+
+
+  //create refresh token record to db
+  await createUserRefreshToken({
+    refreshToken,
+    user: result._id,
+  });
+
+  return { token, refreshToken, role: result.role, email: result.email };
+
+}
+
+const updateDataUsers = async (req) => {
+  const { id } = req.params;
+  const {
+    name,
+    email,
+    address,
+    phone_num } = req.body;
+
+  const checkId = await Users.findOne({
+    _id: id,
+  })
+
+  if (!checkId) throw new NotFoundError(`the user with id ${id} not found`);
+
+  let rawResult = await Users.findByIdAndUpdate(id, {
+    name,
+    email,
+    address,
+    phone_num,
+  }, { new: true, runValidators: true });
+
+
+  const result = deleteSecretCredentials(rawResult);
+
+  return result;
+}
+
+const getAllUser = async (req) => {
+  const { keyword, status, limit, page } = req.query;
+
+  let condition = { role: 'user' };
+
+  if (keyword) {
+    condition = { ...condition, name: { $regex: keyword, $options: 'i' } }
+  }
+  if (status) {
+    condition = { ...condition, status: { $regex: status, $options: 'i' } }
+  }
+
+  const rawResult = await Users.find(condition)
+    .select({ password: 0, otp: 0 })
+    .limit(limit)
+    .skip(limit * (page - 1));
+
+  if (!rawResult || rawResult.length === 0) throw new NotFoundError('User not Found');
+
+  countUsers = await Users.countDocuments({ role: 'user' });
+
+  return { users: rawResult, pages: Math.ceil(countUsers / limit), total: countUsers, page: page };
+}
 
 module.exports = {
   signUpUser,
   activateUser,
   signInUser,
   createAdmin,
+  signInAdmin,
+  updateDataUsers,
+  getAllUser,
 }
