@@ -4,7 +4,6 @@ const { isTokenValid } = require("../utils");
 const authenticateUser = async (req, res, next) => {
   try {
     let token;
-
     //check header
     const authHeader = req.headers.authorization;
 
@@ -28,7 +27,7 @@ const authenticateUser = async (req, res, next) => {
       }
     } else {
       req.user = {
-        _id: payload.userId,
+        userId: payload.userId,
         name: payload.name,
         role: payload.role,
         email: payload.email,

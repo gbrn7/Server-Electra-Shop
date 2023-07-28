@@ -25,7 +25,7 @@ router.put('/admins/:id', authenticateUser, authorizeRoles('admin', 'superAdmin'
 
 router.get('/admins', authenticateUser, authorizeRoles('superAdmin'), getAdmins);
 
-router.get('/admins/Count', authenticateUser, authorizeRoles('superAdmin', 'admin'), countUsers);
+router.get('/admins/users/count', authenticateUser, authorizeRoles('superAdmin', 'admin'), countUsers);
 
 router.post('/users/admins/create', authenticateUser, authorizeRoles('superAdmin'), createCmsAdmin);
 

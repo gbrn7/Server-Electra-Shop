@@ -271,7 +271,7 @@ const updateDataAdmin = async (req) => {
 
   if (!checkId) throw new NotFoundError(`the user with id ${id} not found`);
 
-  if (req.user.role === 'admin' && req.user._id !== id) throw new UnauthorizedError('Unauthorized to access this route');
+  if (req.user.role === 'admin' && req.user.userId !== id) throw new UnauthorizedError('Unauthorized to access this route');
 
   let rawResult = await Users.findByIdAndUpdate(id, {
     name,
