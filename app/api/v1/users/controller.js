@@ -1,4 +1,4 @@
-const { activateUser, signInUser, signUpUser, createAdmin, signInAdmin, updateDataUser, getAllUser, getAllAdmin, getCountUsers, getDetailsUser, getDetailsAdmin, updateDataAdmin } = require('../../../services/mongoose/users');
+const { activateUser, signInUser, signUpUser, createAdmin, signInAdmin, updateDataUser, getAllUser, getAllAdmin, getCountUsers, getDetailsUser, getDetailsAdmin, updateDataAdmin, editStatus } = require('../../../services/mongoose/users');
 const { StatusCodes } = require('http-status-codes');
 
 
@@ -156,6 +156,18 @@ const countUsers = async (req, res, next) => {
   }
 }
 
+const editStatusUser = async (req, res, next) => {
+  try {
+    const result = await editStatus(req);
+
+    res.status(StatusCodes.OK).json({
+      data: result,
+    })
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   signUp,
   signIn,
@@ -170,4 +182,5 @@ module.exports = {
   signInCmsAdmin,
   getAdmins,
   countUsers,
+  editStatusUser,
 }

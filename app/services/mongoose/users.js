@@ -363,6 +363,25 @@ const getCountUsers = async (req) => {
   return result;
 }
 
+const editStatus = async (req) => {
+  const { id } = req.params;
+  const { status } = req.body
+
+  const check = await Users.findById(id);
+
+  if (!check) throw new NotFoundError(`The users with id ${id} not found`);
+
+  if ((check.role === 'admin' || check.role === 'superAdmin') && req.user.role === 'admin') throw new UnauthorizedError(`Unauthorized to acces this route`);
+
+  const rawResult = await Users.findByIdAndUpdate(check._id, {
+    status: status
+  }, { new: true, runValidators: true })
+
+  const result = deleteSecretCredentials(rawResult);
+
+  return result;
+}
+
 module.exports = {
   signUpUser,
   signInUser,
@@ -376,4 +395,5 @@ module.exports = {
   getAllAdmin,
   getCountUsers,
   getDetailsAdmin,
+  editStatus,
 }
