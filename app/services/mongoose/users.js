@@ -155,6 +155,7 @@ const createAdmin = async (req) => {
     password,
     address,
     phone_num,
+    status,
     role
   } = req.body;
 
@@ -171,7 +172,7 @@ const createAdmin = async (req) => {
     rawResult.email = email;
     rawResult.password = password;
     rawResult.address = address;
-    rawResult.status = 'active';
+    rawResult.status = status;
     rawResult.otp = randomOtp;
     rawResult.phone_num = phone_num;
 
@@ -183,7 +184,7 @@ const createAdmin = async (req) => {
       email,
       password,
       address,
-      status: 'active',
+      status,
       otp: randomOtp,
       phone_num,
     })
