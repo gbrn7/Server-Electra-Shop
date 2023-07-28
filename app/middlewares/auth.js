@@ -38,14 +38,17 @@ const authenticateUser = async (req, res, next) => {
 const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role) || req.user.status === 'not active') throw new UnauthorizedError('Unauthorized to access this route');
-
     next();
   }
 }
 
 const authorizeAccessData = (req, res, next) => {
-  if (req.user.role !== 'superAdmin' && req.user.userId !== req.params.id) throw new UnauthorizedError('Unauthorized to access data');
-  next();
+  try {
+    if (req.user.role !== 'superAdmin' && req.user.userId !== req.params.id) throw new UnauthorizedError('Unauthorized to access data');
+    next();
+  } catch (error) {
+    next(error);
+  }
 }
 
 module.exports = {
