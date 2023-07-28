@@ -3,6 +3,7 @@ const { BadRequestError, UnauthorizedError, UnauthenticatedError, NotFoundError 
 const { createJWT, createTokenUser, createRefreshJWT } = require('../../utils');
 const createRandomOtp = require('../../utils/createRandomOTP');
 const deleteSecretCredentials = require('../../utils/deleteSecretCredentials');
+const { otpMail } = require('../email');
 const { createUserRefreshToken } = require('./refreshToken');
 
 //User Authorization
@@ -42,6 +43,8 @@ const signUpUser = async (req) => {
       phone_num
     })
   }
+
+  await otpMail(rawResult.email, rawResult);
 
   const result = deleteSecretCredentials(rawResult);
 
