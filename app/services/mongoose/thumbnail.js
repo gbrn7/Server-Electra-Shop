@@ -18,8 +18,15 @@ const checkingThumbnail = async (id) => {
   return result;
 }
 
+const destroyThumbnailById = async (id) => {
+  const result = await Thumbnail.findByIdAndDelete(id);
+
+  return result;
+}
+
 
 module.exports = {
   createThumbnail,
   checkingThumbnail,
+  destroyThumbnailById,
 }

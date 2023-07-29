@@ -9,6 +9,10 @@ const productsSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'The price of product is required'],
   },
+  stock: {
+    type: Number,
+    default: '0',
+  },
   desc: {
     type: String,
     required: [true, 'The description of product is required']
@@ -16,7 +20,7 @@ const productsSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['draft', 'publish'],
-    default: 'publish'
+    default: 'draft'
   },
   weight: {
     type: Number,
