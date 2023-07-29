@@ -11,6 +11,7 @@ var app = express();
 //router
 const usersRouter = require('./app/api/v1/users/router');
 const usersRefreshToken = require('./app/api/v1/userRefreshToken/router');
+const thumbnailRouter = require('./app/api/v1/Thumbnail/router');
 
 
 //make variable v1
@@ -39,6 +40,7 @@ app.get('/', (req, res) => {
 
 app.use(`${v1}`, usersRouter);
 app.use(`${v1}`, usersRefreshToken);
+app.use(`${v1}`, thumbnailRouter);
 
 // console.log('second')
 // catch 404 and forward to error handler
