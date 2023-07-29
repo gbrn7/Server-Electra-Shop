@@ -1,13 +1,15 @@
 const { StatusCodes } = require('http-status-codes');
+const { getAllProducts } = require('../../../services/mongoose/products');
 
 const index = async (req, res, next) => {
   try {
-    const result = await getAllProduct(req);
+    const result = await getAllProducts(req);
 
     res.status(StatusCodes.OK).json({
       data: result,
     });
   } catch (error) {
+    console.log('first')
     next(error);
   }
 }

@@ -2,6 +2,7 @@ const Thumbnail = require('../../api/v1/Thumbnail/model');
 const { NotFoundError } = require('../../errors');
 
 const createThumbnail = async (req) => {
+
   const result = await Thumbnail.create({
     name: req.file ? `uploads/${req.file.filename}` : `uploads/defaultThumb/default.png`
   })
@@ -16,6 +17,7 @@ const checkingThumbnail = async (id) => {
 
   return result;
 }
+
 
 module.exports = {
   createThumbnail,

@@ -1,10 +1,10 @@
-const { Products } = require('../../api/v1/Products/model');
+const Products = require('../../api/v1/Products/model');
 const { NotFoundError } = require('../../errors');
 
 const getAllProducts = async (req) => {
   const { keyword, price, status, limit, page } = req.query;
 
-  let condition;
+  let condition = {};
 
   if (keyword) {
     condition = { ...condition, name: { $regex: keyword, $options: 'i' } };
@@ -18,9 +18,10 @@ const getAllProducts = async (req) => {
 
   const result = await Products.find(condition);
 
-  if (!result || result.lenth === 0) throw new NotFoundError('Product not Found');
 
-  const countProducts = await Product.countDocuments(condition);
+  if (!result || result.length === 0) throw new NotFoundError('Product not Found');
+
+  const countProducts = await Products.countDocuments(condition);
 
   return { product: result, pages: Math.ceil(countProducts / limit), total: countProducts, page }
 }

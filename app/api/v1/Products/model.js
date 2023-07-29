@@ -10,7 +10,7 @@ const productsSchema = new mongoose.Schema({
     required: [true, 'The price of product is required'],
   },
   desc: {
-    type: text,
+    type: String,
     required: [true, 'The description of product is required']
   },
   status: {

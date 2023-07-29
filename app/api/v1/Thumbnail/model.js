@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { model, Schema } = mongoose;
 
-let imageSchema = Schema(
+let thumbnailSchema = Schema(
   {
     name: {
       type: String
@@ -13,4 +13,4 @@ let imageSchema = Schema(
 
 );
 
-module.exports = model('Image', imageSchema);
+module.exports = model('Thumbnail', thumbnailSchema);
