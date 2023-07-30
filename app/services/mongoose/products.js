@@ -103,9 +103,26 @@ const findProduct = async (req) => {
   return result;
 }
 
+const deleteProduct = async (req) => {
+  const { id } = req.params;
+
+  const result = await Products.findByIdAndDelete(id).populate('thumbnail');
+
+  if (!result) {
+    throw new NotFoundError(`The product with id ${id} not found`);
+  }
+  else {
+    fs.unlinkSync(`public/${result.thumbnail.name}`);
+    await destroyThumbnailById(result._id);
+  }
+
+  return result;
+}
+
 module.exports = {
   getAllProducts,
   createProduct,
   updateProduct,
   findProduct,
+  deleteProduct,
 }
