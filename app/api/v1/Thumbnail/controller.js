@@ -1,23 +1,11 @@
 const { StatusCodes } = require('http-status-codes');
-const { createThumbnail, checkingThumbnail } = require('../../../services/mongoose/thumbnail');
+const { createThumbnail, checkingThumbnail, findThumbnailById, destroyThumbnailById } = require('../../../services/mongoose/thumbnail');
 
 const create = async (req, res, next) => {
   try {
     const result = await createThumbnail(req);
 
     res.status(StatusCodes.CREATED).json({
-      data: result,
-    })
-  } catch (error) {
-    next(error);
-  }
-}
-
-const find = async (req, res, next) => {
-  try {
-    const result = await findThumbnail(req);
-
-    res.status(StatusCodes.OK).json({
       data: result,
     })
   } catch (error) {
@@ -37,21 +25,9 @@ const checkthumb = async (req, res, next) => {
   }
 }
 
-const update = async (req, res, next) => {
-  try {
-    const result = await updateThumbnail(req);
-
-    res.status(StatusCodes.OK).json({
-      data: result,
-    })
-  } catch (error) {
-    next(error);
-  }
-}
-
 const destroy = async (req, res, next) => {
   try {
-    const result = await destroyThumbnail(req);
+    const result = await destroyThumbnailById(req.params.id);
 
     res.status(StatusCodes.OK).json({
       data: result,
@@ -63,8 +39,6 @@ const destroy = async (req, res, next) => {
 
 module.exports = {
   create,
-  find,
-  update,
   destroy,
   checkthumb,
 }
