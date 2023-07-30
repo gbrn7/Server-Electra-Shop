@@ -3,9 +3,9 @@ const { NotFoundError } = require('../../errors');
 
 const createThumbnail = async (req) => {
 
-  const result = await Thumbnail.create({
-    name: req.file ? `uploads/${req.file.filename}` : `uploads/defaultThumb/default.png`
-  })
+  const files = req.files;
+
+  const result = await Thumbnail.create({ files });
 
   return result;
 }

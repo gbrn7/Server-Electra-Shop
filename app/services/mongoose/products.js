@@ -1,7 +1,7 @@
 const Products = require('../../api/v1/Products/model');
 const { NotFoundError, BadRequestError } = require('../../errors');
 const { checkingThumbnail, destroyThumbnailById } = require('./thumbnail');
-const fs = require('fs');
+const deleteFiles = require('../../utils/deleteFiles');
 
 const getAllProducts = async (req) => {
   const { keyword, price, status, limit, page } = req.query;
@@ -18,7 +18,7 @@ const getAllProducts = async (req) => {
     condition = { ...condition, name: { $regex: status, $options: 'i' } };
   }
 
-  const result = await Products.find(condition);
+  const result = await Products.find(condition).populate('thumbnail');
 
 
   if (!result || result.length === 0) throw new NotFoundError('Product not Found');
@@ -72,12 +72,12 @@ const updateProduct = async (req) => {
     thumbnail } = req.body;
 
   if (thumbnail) {
-    await checkingThumbnail(thumbnail);
-    if (check.thumbnail._id.valueOf() !== thumbnail) {
-      fs.unlinkSync(`public/${check.thumbnail.name}`);
-      await destroyThumbnailById(check._id);
-    }
 
+    if (thumbnail !== check.thumbnail._id.valueOf()) {
+      await destroyThumbnailById(check.thumbnail._id);
+
+      deleteFiles(check.thumbnail.files);
+    }
   }
 
   const result = await Products.findByIdAndUpdate(id, {
