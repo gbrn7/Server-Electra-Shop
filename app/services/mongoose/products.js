@@ -93,8 +93,19 @@ const updateProduct = async (req) => {
   return result;
 }
 
+const findProduct = async (req) => {
+  const { id } = req.params;
+
+  const result = await Products.findById(id).populate('thumbnail');
+
+  if (!result) throw new NotFoundError(`The product with id ${id} not found`);
+
+  return result;
+}
+
 module.exports = {
   getAllProducts,
   createProduct,
   updateProduct,
+  findProduct,
 }
