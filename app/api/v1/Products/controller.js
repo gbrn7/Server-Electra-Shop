@@ -74,11 +74,12 @@ const editStatus = async (req, res, next) => {
   }
 }
 
+
 module.exports = {
   index,
   create,
   find,
   update,
   destroy,
-  editStatus
+  editStatus,
 }

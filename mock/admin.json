@@ -1,0 +1,9 @@
+{
+  "name" : "admin3",
+  "role" : "admin",
+  "email" : "admin55@gmail.com",
+  "password" : "rahasia",
+  "status" : "active",
+  "address" : "jl teuku umar",
+  "phone_num" : "78945612387"
+}

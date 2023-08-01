@@ -134,6 +134,50 @@ const editStatusProduct = async (req) => {
   return result;
 }
 
+const chekingProductvailability = async (req) => {
+  const { orderDetails } = req.body;
+
+  const idProducts = orderDetails.map((item) => {
+    return item.productId
+  });
+
+  const checkingProduct = await Products.find({
+    _id: { $in: idProducts },
+  });
+
+  if (!checkingProduct) throw new NotFoundError('The product not found');
+
+  let err;
+  for (let i = 0; i < checkingProduct.length; i++) {
+    if (checkingProduct[i].stock < orderDetails[i].qty) {
+      err.push(checkingProduct[i]);
+    }
+
+    if (i === checkingProduct.length - 1 && err) {
+      throw new BadRequestError(`the stock of product with ${err.map((item) => `id: ${item._id} stock: ${item.stock}`).join(', ')} is less than request`)
+    }
+  }
+
+  return checkingProduct;
+}
+
+const reduceProductStock = async (req) => {
+  const { orderDetails } = req.body;
+
+  const result = Products.bulkWrite(
+    orderDetails.map((item) => {
+      return {
+        updateOne: {
+          filter: { _id: item.productId },
+          update: { $inc: { stock: -item.qty } },
+        }
+      }
+    })
+  )
+
+  return result;
+}
+
 module.exports = {
   getAllProducts,
   createProduct,
@@ -141,4 +185,6 @@ module.exports = {
   findProduct,
   deleteProduct,
   editStatusProduct,
+  chekingProductvailability,
+  reduceProductStock,
 }

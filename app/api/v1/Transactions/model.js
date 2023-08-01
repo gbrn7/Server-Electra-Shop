@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { model, Schema, Types } = mongoose;
 
 const orderDetailSchema = new Schema({
-  product: {
+  productId: {
     type: Types.ObjectId,
     required: true,
   },
@@ -69,7 +69,7 @@ const expeditionSchema = new Schema({
       cost:
       {
         value: {
-          type: number,
+          type: Number,
           required: true,
         },
         etd: {
@@ -84,9 +84,9 @@ const expeditionSchema = new Schema({
   },
   shipment_status: {
     type: String,
-    required: [true, 'Payment status required'],
+    default: "pending",
   },
-  Resi: {
+  resi: {
     type: String,
   },
 })
@@ -105,10 +105,6 @@ const transactionModel = new Schema({
     type: Number,
     required: [true, 'total transactions is required'],
   },
-  total: {
-    type: Number,
-    required: [true, 'total transactions is required'],
-  },
   expedition: {
     type: expeditionSchema,
     required: [true, 'expedition data is required'],
@@ -119,7 +115,10 @@ const transactionModel = new Schema({
   },
   transaction_status: {
     type: String,
-    required: [true, 'Payment status required'],
+    default: "pending",
+  },
+  payment_link: {
+    type: String,
   },
   orderDetails: {
     type: [orderDetailSchema],

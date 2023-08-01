@@ -11,8 +11,9 @@ var app = express();
 //router
 const usersRouter = require('./app/api/v1/users/router');
 const usersRefreshToken = require('./app/api/v1/userRefreshToken/router');
-const thumbnailRouter = require('./app/api/v1/Thumbnail/router');
-const productRouter = require('./app/api/v1/Products/router');
+const thumbnailsRouter = require('./app/api/v1/Thumbnail/router');
+const productsRouter = require('./app/api/v1/Products/router');
+const transactionRouter = require('./app/api/v1/Transactions/router');
 
 
 //make variable v1
@@ -23,7 +24,6 @@ const notFoundMiddleware = require('./app/middlewares/not-found');
 const handleErrorMiddleware = require('./app/middlewares/handler-error');
 
 
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -32,7 +32,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
   res.status(statusCodes.OK).json({
-    message: 'welcome to api semina',
+    message: 'welcome to api electra',
   })
 });
 
@@ -41,8 +41,9 @@ app.get('/', (req, res) => {
 
 app.use(`${v1}`, usersRouter);
 app.use(`${v1}`, usersRefreshToken);
-app.use(`${v1}`, thumbnailRouter);
-app.use(`${v1}`, productRouter);
+app.use(`${v1}`, thumbnailsRouter);
+app.use(`${v1}`, productsRouter);
+app.use(`${v1}`, transactionRouter);
 
 // console.log('second')
 // catch 404 and forward to error handler

@@ -1,0 +1,49 @@
+{
+  "address" : "Jl teuku Umar no.9",
+  "total" : 450000,
+  "expedition" : {
+    "origin_details":{
+      "city_id":"501",
+      "province_id":"5",
+      "province":"DI Yogyakarta",
+      "type":"Kota",
+      "city_name":"Yogyakarta",
+      "postal_code":"55000"
+   },
+   "courierDetail" : {
+    "code":"jne",
+    "name":"Jalur Nugraha Ekakurir (JNE)",
+    "costs":
+       {
+          "service":"OKE",
+          "description":"Ongkos Kirim Ekonomis",
+          "cost":
+             {
+                "value":38000,
+                "etd":"4-5",
+                "note":""
+             }
+       }
+   },
+   "destination_details":{
+      "city_id":"114",
+      "province_id":"1",
+      "province":"Bali",
+      "type":"Kota",
+      "city_name":"Denpasar",
+      "postal_code":"80000"
+   },
+   "resi" : "789456fsgd7gsd"
+  },
+  "payment_link" : "https://www.google.com/",
+  "orderDetails" : [
+    {
+    "productId" : "64c5d4b92d3e63ebbd756323",
+    "qty" : 4
+    },
+    {
+    "productId" : "64c8602eb1a2bfb0133eb4b5",
+    "qty" : 2
+    }
+  ]
+}
