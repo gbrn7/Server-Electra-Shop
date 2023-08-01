@@ -9,7 +9,6 @@ const index = async (req, res, next) => {
       data: result,
     });
   } catch (error) {
-    console.log('first')
     next(error);
   }
 }

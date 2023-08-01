@@ -2,17 +2,21 @@ const Transactions = require('../../api/v1/Transactions/model');
 const { NotFoundError, BadRequestError } = require('../../errors');
 
 const getAllTransaction = async (req) => {
-  const { keyword, limit, page } = req.query;
+  const { userId, limit, page, transaction_status } = req.query;
 
   let condition = {};
 
-  if (keyword) {
-    condition = { ...condition, userId: { $regex: keyword, $options: 'i' } };
+  if (userId) {
+    condition = { ...condition, userId };
+  } if (transaction_status) {
+    condition = { ...condition, transaction_status: { $regex: transaction_status, $options: 'i' } };
   }
 
-  const result = await Transactions.find(condition).populate('thumbnail');
+  console.log(condition);
 
-  if (!result || result.length === 0) throw new NotFoundError('Product not Found');
+  const result = await Transactions.find(condition);
+
+  if (!result || result.length === 0) throw new NotFoundError('transaction not Found');
 
   const countTransactions = await Transactions.countDocuments(condition);
 
