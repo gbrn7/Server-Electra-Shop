@@ -140,45 +140,21 @@ const getCountTransByStatus = async (req) => {
 }
 
 const getHighestSalesProduct = async (req) => {
-  const result = await Transactions.aggregate([
-    {
-      $unwind: "$orderDetails"
-    },
-    {
-      $lookup: {
-        from: "products",
-        localField: "orderDetails.productId",
-        foreignField: "_id",
-        pipeline: [{ $project: { "price": 1, "name": 1, "stock": 1, "total": { $multiply: ["$price", "$orderDetails.qty"] } } }],
-        as: "product"
-      }
-    }, {
-      $set: {
-        "orderDetails.product": "$product"
-      }
-    }, {
-      $group: {
-        _id: "$_id",
-        orderDetails: { $push: "$orderDetails" },
-      }
+
+  const result = await Products.aggregate([{
+    $project: {
+      _id: 1,
+      name: 1,
+      stock: 1,
+      price: 1,
+      productSold: 1,
+      total: { $multiply: ["$price", "$productSold"] }
     }
-  ]);
-  // const result = await Transactions.aggregate([
-  //   {
-  //     $group: {
-  //       _id: "$orderDetails.productId",
-  //       grandTotal: { $sum: "$total" }
-  //     },
-  //   },
-  //   {
-  //     $sort: {
-  //       grandTotal: -1
-  //     }
-  //   },
-  //   {
-  //     $limit: 5
-  //   }
-  // ])
+  }, {
+    $sort: {
+      total: -1
+    }
+  }])
 
   return result;
 }
