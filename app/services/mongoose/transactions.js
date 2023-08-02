@@ -108,10 +108,20 @@ const findTransaction = async (req) => {
   return result;
 }
 
+const deleteTransaction = async (req) => {
+  const { id } = req.params;
+
+  const result = await Transactions.findByIdAndDelete(id);
+
+  if (!result) throw new NotFoundError(`The product with id ${id} not found`);
+
+  return result;
+}
 
 module.exports = {
   getAllTransaction,
   createTransaction,
   updateTransaction,
   findTransaction,
+  deleteTransaction,
 }
