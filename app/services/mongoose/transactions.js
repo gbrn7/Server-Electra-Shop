@@ -160,6 +160,30 @@ const getHighestSalesProduct = async (req) => {
 
   return result;
 }
+
+const getLowestSalesProduct = async (req) => {
+
+  const result = await Products.aggregate([{
+    $project: {
+      _id: 1,
+      name: 1,
+      stock: 1,
+      price: 1,
+      productSold: 1,
+      total: { $multiply: ["$price", "$productSold"] }
+    }
+  }, {
+    $sort: {
+      total: 1
+    }
+  }, {
+    $limit: 5
+  }])
+
+  return result;
+}
+
+
 module.exports = {
   getAllTransaction,
   createTransaction,
@@ -169,4 +193,5 @@ module.exports = {
   getRevenueTrans,
   getCountTransByStatus,
   getHighestSalesProduct,
+  getLowestSalesProduct,
 }

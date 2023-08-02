@@ -1,6 +1,6 @@
 const express = require('express');
 const { authenticateUser, authorizeRoles } = require('../../../middlewares/auth');
-const { index, create, find, update, destroy, readRevenue, readCountTransByStatus, readHighestSalesProduct } = require('./controller');
+const { index, create, find, update, destroy, readRevenue, readCountTransByStatus, readHighestSalesProduct, readLowestSalesProduct } = require('./controller');
 const { CheckAvailProducts, reduceStockProduct } = require('../../../middlewares/product');
 const router = express();
 
@@ -13,6 +13,8 @@ router.get('/transactions/revenue', authenticateUser, authorizeRoles('superAdmin
 router.post('/transactions/countTransByStatus', authenticateUser, authorizeRoles('superAdmin', 'admin'), readCountTransByStatus);
 
 router.get('/transactions/readHighestSalesProduct', authenticateUser, authorizeRoles('superAdmin', 'admin'), readHighestSalesProduct);
+
+router.get('/transactions/readLowestSalesProduct', authenticateUser, authorizeRoles('superAdmin', 'admin'), readLowestSalesProduct);
 
 router.put('/transactions/:id', authenticateUser, authorizeRoles('superAdmin', 'admin'), update);
 
