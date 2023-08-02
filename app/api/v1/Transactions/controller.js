@@ -175,7 +175,6 @@ module.exports = {
   find,
   update,
   destroy,
-  editStatus,
   readRevenue,
   readPendingTrans,
   readHighestSalesProduct,
