@@ -14,8 +14,6 @@ const getAllTransaction = async (req) => {
     condition = { ...condition, transaction_status: { $regex: transaction_status, $options: 'i' } };
   }
 
-  console.log(condition);
-
   const result = await Transactions.find(condition);
 
   if (!result || result.length === 0) throw new NotFoundError('transaction not Found');
@@ -120,6 +118,13 @@ const deleteTransaction = async (req) => {
   return result;
 }
 
+const getRevenueTrans = async (req) => {
+  const revenue = Transactions.aggregate({
+    $group: {
+      grandTotal: { $sum: "" }
+    }
+  })
+}
 
 module.exports = {
   getAllTransaction,
