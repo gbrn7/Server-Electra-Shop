@@ -118,12 +118,15 @@ const deleteTransaction = async (req) => {
   return result;
 }
 
-const getRevenueTrans = async (req) => {
-  const revenue = Transactions.aggregate({
+const getRevenueTrans = async () => {
+  const revenue = await Transactions.aggregate([{
     $group: {
-      grandTotal: { $sum: "" }
+      _id: null,
+      grandTotal: { $sum: "$total" }
     }
-  })
+  }])
+
+  return revenue;
 }
 
 module.exports = {
@@ -132,4 +135,5 @@ module.exports = {
   updateTransaction,
   findTransaction,
   deleteTransaction,
+  getRevenueTrans,
 }
