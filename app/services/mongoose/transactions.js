@@ -126,7 +126,19 @@ const getRevenueTrans = async () => {
     }
   }])
 
+  if (!revenue) throw new NotFoundError("Not Found Transactions");
+
   return revenue;
+}
+
+const getCountTransByStatus = async (req) => {
+  const { transaction_status } = req.body;
+
+  const countPendingRevenue = await Transactions.countDocuments({ transaction_status: { $regex: transaction_status, $options: 'i' } });
+
+  if (!countPendingRevenue) throw new NotFoundError("Not Found Transactions");
+
+  return countPendingRevenue;
 }
 
 module.exports = {
@@ -136,4 +148,5 @@ module.exports = {
   findTransaction,
   deleteTransaction,
   getRevenueTrans,
+  getCountTransByStatus,
 }
