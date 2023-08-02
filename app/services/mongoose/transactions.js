@@ -32,7 +32,7 @@ const createTransaction = async (req) => {
     address,
     total,
     expedition,
-    transactions_status,
+    transaction_status,
     orderDetails
   } = req.body;
 
@@ -41,8 +41,8 @@ const createTransaction = async (req) => {
     address,
     total,
     expedition,
-    transactions_code: Math.floor(Math.random() * 99999999),
-    transactions_status,
+    transaction_code: Math.floor(Math.random() * 99999999),
+    transaction_status,
     orderDetails
   });
 
@@ -61,28 +61,30 @@ const updateTransaction = async (req) => {
     address,
     total,
     expedition,
-    transactions_code,
-    transactions_status,
+    transaction_code,
+    transaction_status,
     orderDetails
   } = req.body;
 
-  await checkingRollbackProduct(check.orderDetails, orderDetails);
+  if (orderDetails) {
+    await checkingRollbackProduct(check.orderDetails, orderDetails);
 
-  for (let i = 0; i < check.orderDetails.length; i++) {
-    if (check.orderDetails[i].productId.valueOf() === orderDetails[i].productId
-      && check.orderDetails[i].qty !== orderDetails[i].qty) {
-      try {
-        await Products.bulkWrite([{
-          updateOne: {
-            filter: { _id: check.orderDetails[i].productId.valueOf() },
-            update: { $inc: { stock: check.orderDetails[i].qty - orderDetails[i].qty } },
-          },
-        }]);
-      } catch (error) {
-        throw new BadRequestError(error);
+    for (let i = 0; i < check.orderDetails.length; i++) {
+      if (check.orderDetails[i].productId.valueOf() === orderDetails[i].productId
+        && check.orderDetails[i].qty !== orderDetails[i].qty) {
+        try {
+          await Products.bulkWrite([{
+            updateOne: {
+              filter: { _id: check.orderDetails[i].productId.valueOf() },
+              update: { $inc: { stock: check.orderDetails[i].qty - orderDetails[i].qty } },
+            },
+          }]);
+        } catch (error) {
+          throw new BadRequestError(error);
+        }
+      } else if (check.orderDetails[i].productId.valueOf() !== orderDetails[i].productId) {
+        throw new BadRequestError('The old orderDetail id and new orderDetail id is not the same')
       }
-    } else if (check.orderDetails[i].productId.valueOf() !== orderDetails[i].productId) {
-      throw new BadRequestError('The old orderDetail id and new orderDetail id is not the same')
     }
   }
 
@@ -91,8 +93,8 @@ const updateTransaction = async (req) => {
     address,
     total,
     expedition,
-    transactions_code,
-    transactions_status,
+    transaction_code,
+    transaction_status,
     orderDetails
   }, { new: true, runValidators: true });
 
@@ -117,6 +119,7 @@ const deleteTransaction = async (req) => {
 
   return result;
 }
+
 
 module.exports = {
   getAllTransaction,

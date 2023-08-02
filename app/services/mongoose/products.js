@@ -119,21 +119,6 @@ const deleteProduct = async (req) => {
   return result;
 }
 
-const editStatusProduct = async (req) => {
-  const { id } = req.params;
-  const { status } = req.body
-
-  const check = await Products.findById(id);
-
-  if (!check) throw new NotFoundError(`the product with id ${id} not found`);
-
-  const result = await Products.findByIdAndUpdate(check._id, {
-    status: status
-  }, { new: true, runValidators: true })
-
-  return result;
-}
-
 const chekingProductvailability = async (req) => {
   const { orderDetails } = req.body;
 
@@ -215,7 +200,6 @@ module.exports = {
   updateProduct,
   findProduct,
   deleteProduct,
-  editStatusProduct,
   chekingProductvailability,
   reduceProductStock,
   checkingRollbackProduct,

@@ -109,7 +109,7 @@ const transactionModel = new Schema({
     type: expeditionSchema,
     required: [true, 'expedition data is required'],
   },
-  transactions_code: {
+  transaction_code: {
     type: String,
     required: [true, 'transaction code is required'],
   },

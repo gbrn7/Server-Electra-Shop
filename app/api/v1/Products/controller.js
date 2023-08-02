@@ -62,24 +62,10 @@ const destroy = async (req, res, next) => {
   }
 }
 
-const editStatus = async (req, res, next) => {
-  try {
-    const result = await editStatusProduct(req);
-
-    res.status(StatusCodes.OK).json({
-      data: result,
-    })
-  } catch (error) {
-    next(error);
-  }
-}
-
-
 module.exports = {
   index,
   create,
   find,
   update,
   destroy,
-  editStatus,
 }
