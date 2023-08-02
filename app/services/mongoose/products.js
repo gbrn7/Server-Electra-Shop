@@ -147,15 +147,16 @@ const chekingProductvailability = async (req) => {
 
   if (!checkingProduct) throw new NotFoundError('The product not found');
 
-  let err;
+  let err = [];
   for (let i = 0; i < checkingProduct.length; i++) {
     if (checkingProduct[i].stock < orderDetails[i].qty) {
       err.push(checkingProduct[i]);
     }
 
-    if (i === checkingProduct.length - 1 && err) {
-      throw new BadRequestError(`the stock of product with ${err.map((item) => `id: ${item._id} stock: ${item.stock}`).join(', ')} is less than request`)
-    }
+  }
+
+  if (err.length !== 0) {
+    throw new BadRequestError(`the stock of product with ${err.map((item) => `id: ${item._id} stock: ${item.stock}`).join(', ')} is less than request`)
   }
 
   return checkingProduct;
@@ -164,7 +165,7 @@ const chekingProductvailability = async (req) => {
 const reduceProductStock = async (req) => {
   const { orderDetails } = req.body;
 
-  const result = Products.bulkWrite(
+  const result = await Products.bulkWrite(
     orderDetails.map((item) => {
       return {
         updateOne: {
@@ -174,8 +175,38 @@ const reduceProductStock = async (req) => {
       }
     })
   )
-
   return result;
+}
+
+const checkingRollbackProduct = async (oldData, newData) => {
+  const idProducts = await newData.map((item) => {
+    return item.productId
+  });
+
+  const checkingProduct = await Products.find({
+    _id: { $in: idProducts },
+  });
+
+  if (!checkingProduct) throw new NotFoundError('The product not found');
+
+
+  let err = [];
+
+  for (let i = 0; i < newData.length; i++) {
+    if (oldData[i].productId.valueOf() === newData[i].productId && oldData[i].productId.valueOf() === checkingProduct[i]._id.valueOf()) {
+      let check = checkingProduct[i].stock + oldData[i].qty - newData[i].qty;
+
+      if (check < 0) {
+        err.push(checkingProduct[i]);
+      }
+    } else {
+      throw new BadRequestError('the data transaction invalid');
+    }
+  }
+
+  if (err.length !== 0) {
+    throw new BadRequestError(`the stock of product with ${err.map((item) => `id: ${item._id} stock: ${item.stock}`).join(', ')} is less than request`)
+  }
 }
 
 module.exports = {
@@ -187,4 +218,5 @@ module.exports = {
   editStatusProduct,
   chekingProductvailability,
   reduceProductStock,
+  checkingRollbackProduct,
 }

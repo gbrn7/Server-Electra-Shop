@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { BadRequestError } = require('../../../errors');
 
 const productsSchema = new mongoose.Schema({
   name: {
@@ -33,6 +34,15 @@ const productsSchema = new mongoose.Schema({
   },
 }, {
   timestamps: true
+});
+
+productsSchema.pre('save', async function (next) {
+  const product = this;
+  if (product.isModified('stock')) {
+    if (product.stock < 0) {
+      throw new BadRequestError(`the product with id ${product.stock} is less than transaction req`);
+    }
+  }
 });
 
 module.exports = mongoose.model('Product', productsSchema);

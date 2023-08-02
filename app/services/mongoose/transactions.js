@@ -1,5 +1,7 @@
 const Transactions = require('../../api/v1/Transactions/model');
+const Products = require('../../api/v1/Products/model');
 const { NotFoundError, BadRequestError } = require('../../errors');
+const { checkingRollbackProduct } = require('./products');
 
 const getAllTransaction = async (req) => {
   const { userId, limit, page, transaction_status } = req.query;
@@ -64,7 +66,27 @@ const updateTransaction = async (req) => {
     orderDetails
   } = req.body;
 
-  const result = await Transactions.create({
+  await checkingRollbackProduct(check.orderDetails, orderDetails);
+
+  for (let i = 0; i < check.orderDetails.length; i++) {
+    if (check.orderDetails[i].productId.valueOf() === orderDetails[i].productId
+      && check.orderDetails[i].qty !== orderDetails[i].qty) {
+      try {
+        await Products.bulkWrite([{
+          updateOne: {
+            filter: { _id: check.orderDetails[i].productId.valueOf() },
+            update: { $inc: { stock: check.orderDetails[i].qty - orderDetails[i].qty } },
+          },
+        }]);
+      } catch (error) {
+        throw new BadRequestError(error);
+      }
+    } else if (check.orderDetails[i].productId.valueOf() !== orderDetails[i].productId) {
+      throw new BadRequestError('The old orderDetail id and new orderDetail id is not the same')
+    }
+  }
+
+  const result = await Transactions.findByIdAndUpdate(id, {
     userId,
     address,
     total,
