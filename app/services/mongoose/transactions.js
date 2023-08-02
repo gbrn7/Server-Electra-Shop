@@ -154,6 +154,8 @@ const getHighestSalesProduct = async (req) => {
     $sort: {
       total: -1
     }
+  }, {
+    $limit: 5
   }])
 
   return result;
