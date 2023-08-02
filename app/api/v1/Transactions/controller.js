@@ -61,18 +61,6 @@ const destroy = async (req, res, next) => {
   }
 }
 
-const editStatus = async (req, res, next) => {
-  try {
-    const result = await editStatusTransaction(req);
-
-    res.status(StatusCodes.OK).json({
-      data: result,
-    })
-  } catch (error) {
-    next(error);
-  }
-}
-
 const readRevenue = async (req, res, next) => {
   try {
     const result = await getRevenueTrans(req);
