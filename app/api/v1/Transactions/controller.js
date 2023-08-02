@@ -1,5 +1,5 @@
 const { StatusCodes } = require('http-status-codes');
-const { createTransaction, getAllTransaction, findTransaction, updateTransaction, deleteTransaction, getRevenueTrans, getCountTransByStatus } = require('../../../services/mongoose/transactions');
+const { createTransaction, getAllTransaction, findTransaction, updateTransaction, deleteTransaction, getRevenueTrans, getCountTransByStatus, getHighestSalesProduct } = require('../../../services/mongoose/transactions');
 
 const index = async (req, res, next) => {
   try {

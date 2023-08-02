@@ -71,8 +71,9 @@ const updateTransaction = async (req) => {
       if (check.orderDetails[i].productId.valueOf() === orderDetails[i].productId
         && check.orderDetails[i].qty !== orderDetails[i].qty) {
         try {
+          const diff = check.orderDetails[i].qty - orderDetails[i].qty;
           await Products.findByIdAndUpdate(check.orderDetails[i].productId.valueOf(), {
-            $inc: { stock: check.orderDetails[i].qty - orderDetails[i].qty }
+            $inc: { stock: diff, productSold: diff * -1 }
           });
         } catch (error) {
           throw new BadRequestError(error);
@@ -138,6 +139,49 @@ const getCountTransByStatus = async (req) => {
   return countPendingRevenue;
 }
 
+const getHighestSalesProduct = async (req) => {
+  const result = await Transactions.aggregate([
+    {
+      $unwind: "$orderDetails"
+    },
+    {
+      $lookup: {
+        from: "products",
+        localField: "orderDetails.productId",
+        foreignField: "_id",
+        pipeline: [{ $project: { "price": 1, "name": 1, "stock": 1, "total": { $multiply: ["$price", "$orderDetails.qty"] } } }],
+        as: "product"
+      }
+    }, {
+      $set: {
+        "orderDetails.product": "$product"
+      }
+    }, {
+      $group: {
+        _id: "$_id",
+        orderDetails: { $push: "$orderDetails" },
+      }
+    }
+  ]);
+  // const result = await Transactions.aggregate([
+  //   {
+  //     $group: {
+  //       _id: "$orderDetails.productId",
+  //       grandTotal: { $sum: "$total" }
+  //     },
+  //   },
+  //   {
+  //     $sort: {
+  //       grandTotal: -1
+  //     }
+  //   },
+  //   {
+  //     $limit: 5
+  //   }
+  // ])
+
+  return result;
+}
 module.exports = {
   getAllTransaction,
   createTransaction,
@@ -146,4 +190,5 @@ module.exports = {
   deleteTransaction,
   getRevenueTrans,
   getCountTransByStatus,
+  getHighestSalesProduct,
 }

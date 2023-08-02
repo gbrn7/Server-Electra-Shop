@@ -36,6 +36,7 @@ const createProduct = async (req) => {
     stock,
     desc,
     status,
+    productSold,
     weight,
     thumbnail } = req.body;
 
@@ -49,6 +50,7 @@ const createProduct = async (req) => {
     stock,
     desc,
     status,
+    productSold,
     weight,
     thumbnail
   });
@@ -69,6 +71,7 @@ const updateProduct = async (req) => {
     stock,
     desc,
     status,
+    productSold,
     weight,
     thumbnail } = req.body;
 
@@ -87,6 +90,7 @@ const updateProduct = async (req) => {
     stock,
     desc,
     status,
+    productSold,
     weight,
     thumbnail
   }, { new: true, runValidators: true });
@@ -155,7 +159,7 @@ const reduceProductStock = async (req) => {
       return {
         updateOne: {
           filter: { _id: item.productId },
-          update: { $inc: { stock: -item.qty } },
+          update: { $inc: { stock: -item.qty, productSold: item.qty } },
         }
       }
     })
