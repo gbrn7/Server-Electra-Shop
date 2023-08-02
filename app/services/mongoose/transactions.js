@@ -101,15 +101,14 @@ const updateTransaction = async (req) => {
 
 const findTransaction = async (req) => {
   const { id } = req.params;
-
-  console.log(id);
-
   const result = Transactions.findById(id);
 
   if (!result) throw new NotFoundError(`The product with id ${id} not found`);
 
   return result;
 }
+
+
 module.exports = {
   getAllTransaction,
   createTransaction,

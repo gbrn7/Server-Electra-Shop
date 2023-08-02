@@ -2,6 +2,7 @@ const Products = require('../../api/v1/Products/model');
 const { NotFoundError, BadRequestError } = require('../../errors');
 const { checkingThumbnail, destroyThumbnailById } = require('./thumbnail');
 const deleteFiles = require('../../utils/deleteFiles');
+const fs = require('fs');
 
 const getAllProducts = async (req) => {
   const { keyword, price, status, limit, page } = req.query;
@@ -111,9 +112,8 @@ const deleteProduct = async (req) => {
   if (!result) {
     throw new NotFoundError(`The product with id ${id} not found`);
   }
-  else {
-    fs.unlinkSync(`public/${result.thumbnail.name}`);
-    await destroyThumbnailById(result._id);
+  else if (result?.thumbnail) {
+    destroyThumbnailById(result.thumbnail);
   }
 
   return result;
