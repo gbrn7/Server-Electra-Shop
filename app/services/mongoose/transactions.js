@@ -71,12 +71,9 @@ const updateTransaction = async (req) => {
       if (check.orderDetails[i].productId.valueOf() === orderDetails[i].productId
         && check.orderDetails[i].qty !== orderDetails[i].qty) {
         try {
-          await Products.bulkWrite([{
-            updateOne: {
-              filter: { _id: check.orderDetails[i].productId.valueOf() },
-              update: { $inc: { stock: check.orderDetails[i].qty - orderDetails[i].qty } },
-            },
-          }]);
+          await Products.findByIdAndUpdate(check.orderDetails[i].productId.valueOf(), {
+            $inc: { stock: check.orderDetails[i].qty - orderDetails[i].qty }
+          });
         } catch (error) {
           throw new BadRequestError(error);
         }
