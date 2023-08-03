@@ -3,7 +3,6 @@ var createError = require('http-errors');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const { statusCodes } = require('http-status-codes');
 
 
 var app = express();
@@ -14,6 +13,7 @@ const usersRefreshToken = require('./app/api/v1/userRefreshToken/router');
 const thumbnailsRouter = require('./app/api/v1/Thumbnail/router');
 const productsRouter = require('./app/api/v1/Products/router');
 const transactionRouter = require('./app/api/v1/Transactions/router');
+const midtransRouter = require('./app/api/v1/midtrans/router');
 
 
 //make variable v1
@@ -31,14 +31,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
-  res.status(statusCodes.OK).json({
+  res.json({
     message: 'welcome to api electra',
   })
 });
 
 
 // console.log('first');
-
+app.use(`${v1}`, midtransRouter);
 app.use(`${v1}`, usersRouter);
 app.use(`${v1}`, usersRefreshToken);
 app.use(`${v1}`, thumbnailsRouter);

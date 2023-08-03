@@ -117,6 +117,9 @@ const transactionModel = new Schema({
   payment_link: {
     type: String,
   },
+  payment_token: {
+    type: String,
+  },
   orderDetails: {
     type: [orderDetailSchema],
     required: [true, 'the order details id required '],

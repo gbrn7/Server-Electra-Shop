@@ -10,4 +10,7 @@ module.exports = {
   jwtRefreshTokenExpiration: process.env.JWT_EXPIRATION_REFRESH_TOKEN,
   gmail: process.env.GMAIL,
   pass: process.env.PASSWORD,
+  MidtransServerKey: process.env.MIDTRANS_SERVER_KEY,
+  MidtransClientKey: process.env.MIDTRANS_CLIENT_KEY,
+  MidtransIsProduction: process.env.MIDTRANS_IS_PRODUCTION,
 };

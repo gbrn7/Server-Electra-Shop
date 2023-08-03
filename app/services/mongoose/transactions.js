@@ -4,6 +4,7 @@ const { NotFoundError, BadRequestError } = require('../../errors');
 const { checkingRollbackProduct } = require('./products');
 const { startOfDay } = require('date-fns')
 const { endOfDay } = require('date-fns')
+const { makeMidtrans } = require('../midtrans')
 
 const getAllTransaction = async (req) => {
   const {
@@ -82,6 +83,18 @@ const createTransaction = async (req) => {
   });
 
   if (!result) throw new NotFoundError('Internal server error');
+
+  const midtransResult = await makeMidtrans(result, req);
+
+  if (midtransResult) {
+    result.payment_link = midtransResult.redirect_url;
+    result.payment_token = midtransResult.token;
+
+    await result.save();
+  } else {
+
+    if (!result) throw new NotFoundError('Internal server error');
+  }
 
   return result;
 }
@@ -246,6 +259,7 @@ const updateShipmentStatus = async (req) => {
 
   return result;
 }
+
 
 module.exports = {
   getAllTransaction,
