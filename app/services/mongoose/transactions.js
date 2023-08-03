@@ -2,9 +2,18 @@ const Transactions = require('../../api/v1/Transactions/model');
 const Products = require('../../api/v1/Products/model');
 const { NotFoundError, BadRequestError } = require('../../errors');
 const { checkingRollbackProduct } = require('./products');
+const { startOfDay } = require('date-fns')
+const { endOfDay } = require('date-fns')
 
 const getAllTransaction = async (req) => {
-  const { userId, limit, page, transaction_status } = req.query;
+  const {
+    userId,
+    limit,
+    page,
+    transaction_status,
+    shipment_status,
+    startDate,
+    endDate, } = req.query;
 
   let condition = {};
 
@@ -12,9 +21,37 @@ const getAllTransaction = async (req) => {
     condition = { ...condition, userId };
   } if (transaction_status) {
     condition = { ...condition, transaction_status: { $regex: transaction_status, $options: 'i' } };
+  } if (shipment_status) {
+    condition = {
+      ...condition, 'expedition.shipment_status': { $regex: shipment_status, $options: 'i' }
+    };
+  } if (startDate) {
+    condition = {
+      ...condition, updatedAt: {
+        $gt: startOfDay(new Date(`${startDate}`)),
+      }
+    };
+  } if (endDate) {
+    condition = { ...condition, updatedAt: { $lt: endOfDay(new Date(`${endDate}`)) } };
   }
 
-  const result = await Transactions.find(condition);
+  const result = await Transactions.aggregate([{
+    $match: condition
+  }, {
+    $project: {
+      _id: 1,
+      userId: 1,
+      address: 1,
+      expedition: 1,
+      transaction_code: 1,
+      transaction_status: 1,
+      orderDetails: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      date: { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } },
+    }
+  }
+  ]);
 
   if (!result || result.length === 0) throw new NotFoundError('transaction not Found');
 
