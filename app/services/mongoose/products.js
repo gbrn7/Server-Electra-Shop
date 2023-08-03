@@ -2,6 +2,7 @@ const Products = require('../../api/v1/Products/model');
 const { NotFoundError, BadRequestError } = require('../../errors');
 const { checkingThumbnail, destroyThumbnailById } = require('./thumbnail');
 const deleteFiles = require('../../utils/deleteFiles');
+const fs = require('fs');
 
 const getAllProducts = async (req) => {
   const { keyword, price, status, limit, page } = req.query;
@@ -35,6 +36,7 @@ const createProduct = async (req) => {
     stock,
     desc,
     status,
+    productSold,
     weight,
     thumbnail } = req.body;
 
@@ -48,6 +50,7 @@ const createProduct = async (req) => {
     stock,
     desc,
     status,
+    productSold,
     weight,
     thumbnail
   });
@@ -68,6 +71,7 @@ const updateProduct = async (req) => {
     stock,
     desc,
     status,
+    productSold,
     weight,
     thumbnail } = req.body;
 
@@ -86,6 +90,7 @@ const updateProduct = async (req) => {
     stock,
     desc,
     status,
+    productSold,
     weight,
     thumbnail
   }, { new: true, runValidators: true });
@@ -111,25 +116,9 @@ const deleteProduct = async (req) => {
   if (!result) {
     throw new NotFoundError(`The product with id ${id} not found`);
   }
-  else {
-    fs.unlinkSync(`public/${result.thumbnail.name}`);
-    await destroyThumbnailById(result._id);
+  else if (result?.thumbnail) {
+    destroyThumbnailById(result.thumbnail);
   }
-
-  return result;
-}
-
-const editStatusProduct = async (req) => {
-  const { id } = req.params;
-  const { status } = req.body
-
-  const check = await Products.findById(id);
-
-  if (!check) throw new NotFoundError(`the product with id ${id} not found`);
-
-  const result = await Products.findByIdAndUpdate(check._id, {
-    status: status
-  }, { new: true, runValidators: true })
 
   return result;
 }
@@ -170,7 +159,7 @@ const reduceProductStock = async (req) => {
       return {
         updateOne: {
           filter: { _id: item.productId },
-          update: { $inc: { stock: -item.qty } },
+          update: { $inc: { stock: -item.qty, productSold: item.qty } },
         }
       }
     })
@@ -215,7 +204,6 @@ module.exports = {
   updateProduct,
   findProduct,
   deleteProduct,
-  editStatusProduct,
   chekingProductvailability,
   reduceProductStock,
   checkingRollbackProduct,

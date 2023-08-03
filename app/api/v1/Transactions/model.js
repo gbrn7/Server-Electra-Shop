@@ -86,9 +86,6 @@ const expeditionSchema = new Schema({
     type: String,
     default: "pending",
   },
-  resi: {
-    type: String,
-  },
 })
 
 const transactionModel = new Schema({
@@ -109,7 +106,7 @@ const transactionModel = new Schema({
     type: expeditionSchema,
     required: [true, 'expedition data is required'],
   },
-  transactions_code: {
+  transaction_code: {
     type: String,
     required: [true, 'transaction code is required'],
   },

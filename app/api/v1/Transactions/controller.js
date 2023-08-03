@@ -1,5 +1,5 @@
 const { StatusCodes } = require('http-status-codes');
-const { createTransaction, getAllTransaction, findTransaction, updateTransaction } = require('../../../services/mongoose/transactions');
+const { createTransaction, getAllTransaction, findTransaction, updateTransaction, deleteTransaction, getRevenueTrans, getCountTransByStatus, getHighestSalesProduct, getLowestSalesProduct, updateShipmentStatus } = require('../../../services/mongoose/transactions');
 
 const index = async (req, res, next) => {
   try {
@@ -61,21 +61,9 @@ const destroy = async (req, res, next) => {
   }
 }
 
-const editStatus = async (req, res, next) => {
-  try {
-    const result = await editStatusTransaction(req);
-
-    res.status(StatusCodes.OK).json({
-      data: result,
-    })
-  } catch (error) {
-    next(error);
-  }
-}
-
 const readRevenue = async (req, res, next) => {
   try {
-    const result = await getRevenueTrans(req);
+    const result = await getRevenueTrans();
 
     res.status(StatusCodes.OK).json({
       data: result,
@@ -85,9 +73,9 @@ const readRevenue = async (req, res, next) => {
   }
 }
 
-const readPendingTrans = async (req, res, next) => {
+const readCountTransByStatus = async (req, res, next) => {
   try {
-    const result = await getRevenueTrans(req);
+    const result = await getCountTransByStatus(req);
 
     res.status(StatusCodes.OK).json({
       data: result,
@@ -145,33 +133,9 @@ const readNewSchedules = async (req, res, next) => {
   }
 }
 
-const readSchedules = async (req, res, next) => {
-  try {
-    const result = await getSchedules(req);
-
-    res.status(StatusCodes.OK).json({
-      data: result,
-    })
-  } catch (error) {
-    next(error);
-  }
-}
-
 const updateShipment = async (req, res, next) => {
   try {
     const result = await updateShipmentStatus(req);
-
-    res.status(StatusCodes.OK).json({
-      data: result,
-    })
-  } catch (error) {
-    next(error);
-  }
-}
-
-const updatedeliveryReceipt = async (req, res, next) => {
-  try {
-    const result = await updatedShipmentReceipt(req);
 
     res.status(StatusCodes.OK).json({
       data: result,
@@ -187,14 +151,11 @@ module.exports = {
   find,
   update,
   destroy,
-  editStatus,
   readRevenue,
-  readPendingTrans,
+  readCountTransByStatus,
   readHighestSalesProduct,
   readLowestSalesProduct,
   readNewTransactions,
   readNewSchedules,
-  readSchedules,
   updateShipment,
-  updatedeliveryReceipt,
 }

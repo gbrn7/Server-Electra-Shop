@@ -1,5 +1,5 @@
 const { StatusCodes } = require('http-status-codes');
-const { getAllProducts, createProduct, updateProduct, findProduct, deleteProduct, editStatusProduct } = require('../../../services/mongoose/products');
+const { getAllProducts, createProduct, updateProduct, findProduct, deleteProduct } = require('../../../services/mongoose/products');
 
 const index = async (req, res, next) => {
   try {
@@ -62,24 +62,10 @@ const destroy = async (req, res, next) => {
   }
 }
 
-const editStatus = async (req, res, next) => {
-  try {
-    const result = await editStatusProduct(req);
-
-    res.status(StatusCodes.OK).json({
-      data: result,
-    })
-  } catch (error) {
-    next(error);
-  }
-}
-
-
 module.exports = {
   index,
   create,
   find,
   update,
   destroy,
-  editStatus,
 }

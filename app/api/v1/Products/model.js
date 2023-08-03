@@ -23,6 +23,10 @@ const productsSchema = new mongoose.Schema({
     enum: ['draft', 'publish'],
     default: 'draft'
   },
+  productSold: {
+    type: Number,
+    default: 0
+  },
   weight: {
     type: Number,
     required: [true, 'The weight of product is required'],
