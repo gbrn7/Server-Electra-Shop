@@ -133,33 +133,9 @@ const readNewSchedules = async (req, res, next) => {
   }
 }
 
-const readSchedules = async (req, res, next) => {
-  try {
-    const result = await getSchedules(req);
-
-    res.status(StatusCodes.OK).json({
-      data: result,
-    })
-  } catch (error) {
-    next(error);
-  }
-}
-
 const updateShipment = async (req, res, next) => {
   try {
     const result = await updateShipmentStatus(req);
-
-    res.status(StatusCodes.OK).json({
-      data: result,
-    })
-  } catch (error) {
-    next(error);
-  }
-}
-
-const updatedeliveryReceipt = async (req, res, next) => {
-  try {
-    const result = await updatedShipmentReceipt(req);
 
     res.status(StatusCodes.OK).json({
       data: result,
@@ -181,7 +157,5 @@ module.exports = {
   readLowestSalesProduct,
   readNewTransactions,
   readNewSchedules,
-  readSchedules,
   updateShipment,
-  updatedeliveryReceipt,
 }
