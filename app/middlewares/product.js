@@ -1,9 +1,10 @@
-const { StatusCodes } = require("http-status-codes");
 const { chekingProductvailability, reduceProductStock } = require("../services/mongoose/products");
 
 const CheckAvailProducts = async (req, res, next) => {
   try {
-    await chekingProductvailability(req);
+    const result = await chekingProductvailability(req);
+
+    req.body.detailProducts = result;
 
     next();
   } catch (error) {

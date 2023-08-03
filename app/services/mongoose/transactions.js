@@ -4,7 +4,8 @@ const { NotFoundError, BadRequestError } = require('../../errors');
 const { checkingRollbackProduct } = require('./products');
 const { startOfDay } = require('date-fns')
 const { endOfDay } = require('date-fns')
-const { makeMidtrans } = require('../midtrans')
+const { makeMidtrans } = require('../midtrans');
+const { transactionInvoice } = require('../email');
 
 const getAllTransaction = async (req) => {
   const {
@@ -46,6 +47,8 @@ const getAllTransaction = async (req) => {
       expedition: 1,
       transaction_code: 1,
       transaction_status: 1,
+      payment_link: 1,
+      payment_token: 1,
       orderDetails: 1,
       createdAt: 1,
       updatedAt: 1,
@@ -66,7 +69,7 @@ const createTransaction = async (req) => {
 
   const {
     address,
-    total,
+    totalBill,
     expedition,
     transaction_status,
     orderDetails
@@ -75,7 +78,7 @@ const createTransaction = async (req) => {
   const result = await Transactions.create({
     userId,
     address,
-    total,
+    total: totalBill,
     expedition,
     transaction_code: Math.floor(Math.random() * 99999999),
     transaction_status,
@@ -91,10 +94,14 @@ const createTransaction = async (req) => {
     result.payment_token = midtransResult.token;
 
     await result.save();
+
+    req.body.payment_link = result.payment_link;
   } else {
 
     if (!result) throw new NotFoundError('Internal server error');
   }
+
+  await transactionInvoice(req.user.email, req.body);
 
   return result;
 }

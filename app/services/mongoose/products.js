@@ -2,7 +2,6 @@ const Products = require('../../api/v1/Products/model');
 const { NotFoundError, BadRequestError } = require('../../errors');
 const { checkingThumbnail, destroyThumbnailById } = require('./thumbnail');
 const deleteFiles = require('../../utils/deleteFiles');
-const fs = require('fs');
 
 const getAllProducts = async (req) => {
   const { keyword, price, status, limit, page } = req.query;
@@ -137,15 +136,26 @@ const chekingProductvailability = async (req) => {
   if (!checkingProduct) throw new NotFoundError('The product not found');
 
   let err = [];
+  let totalBill = 0;
   for (let i = 0; i < checkingProduct.length; i++) {
-    if (checkingProduct[i].stock < orderDetails[i].qty) {
-      err.push(checkingProduct[i]);
+    for (let j = 0; j < orderDetails.length; j++) {
+      if (checkingProduct[i]._id.valueOf() === orderDetails[j].productId) {
+        if (checkingProduct[i].stock < orderDetails[i].qty) {
+          err.push(checkingProduct[i]);
+        } else {
+          const bill = (checkingProduct[i].price * orderDetails[j].qty);
+          totalBill += bill;
+          checkingProduct[i].price = bill;
+          checkingProduct[i].stock = orderDetails[j].qty;
+        }
+      }
     }
-
   }
 
   if (err.length !== 0) {
     throw new BadRequestError(`the stock of product with ${err.map((item) => `id: ${item._id} stock: ${item.stock}`).join(', ')} is less than request`)
+  } else {
+    req.body.totalBill = totalBill;
   }
 
   return checkingProduct;

@@ -30,6 +30,24 @@ const otpMail = async (emailDestination, data) => {
   }
 }
 
+const transactionInvoice = async (emailDestination, data) => {
+  try {
+    let template = fs.readFileSync('app/views/email/invoice.html', 'utf-8');
+
+    let message = {
+      from: gmail,
+      to: emailDestination,
+      subject: 'Electra Invoice',
+      html: Mustache.render(template, data),
+    }
+
+    return await transporter.sendMail(message);
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 module.exports = {
-  otpMail
+  otpMail,
+  transactionInvoice,
 }
