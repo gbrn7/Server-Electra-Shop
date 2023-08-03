@@ -81,6 +81,8 @@ const createTransaction = async (req) => {
     orderDetails
   });
 
+  if (!result) throw new NotFoundError('Internal server error');
+
   return result;
 }
 
@@ -130,6 +132,8 @@ const updateTransaction = async (req) => {
     transaction_status,
     orderDetails
   }, { new: true, runValidators: true });
+
+  if (!result) throw new NotFoundError('Internal server error');
 
   return result;
 }
@@ -195,6 +199,8 @@ const getHighestSalesProduct = async (req) => {
     $limit: 5
   }])
 
+  if (!result) throw new NotFoundError('Internal server error');
+
   return result;
 }
 
@@ -217,9 +223,29 @@ const getLowestSalesProduct = async (req) => {
     $limit: 5
   }])
 
+  if (!result) throw new NotFoundError('Internal server error');
+
   return result;
 }
 
+const updateShipmentStatus = async (req) => {
+  const { id } = req.params;
+  const { shipment_status } = req.body;
+
+  if (!shipment_status) throw new BadRequestError("provide the shipment status / delivery recipt from courier");
+
+  const check = await Transactions.findById(id);
+
+  if (!check) throw new NotFoundError(`The product with id ${id} not found`);
+
+  const result = Transactions.findByIdAndUpdate(id, {
+    'expedition.shipment_status': shipment_status
+  }, { new: true, runValidators: true })
+
+  if (!result) throw new NotFoundError('Internal server error');
+
+  return result;
+}
 
 module.exports = {
   getAllTransaction,
@@ -231,4 +257,5 @@ module.exports = {
   getCountTransByStatus,
   getHighestSalesProduct,
   getLowestSalesProduct,
+  updateShipmentStatus,
 }
