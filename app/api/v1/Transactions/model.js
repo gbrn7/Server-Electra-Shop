@@ -86,9 +86,6 @@ const expeditionSchema = new Schema({
     type: String,
     default: "pending",
   },
-  resi: {
-    type: String,
-  },
 })
 
 const transactionModel = new Schema({
