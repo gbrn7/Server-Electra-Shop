@@ -34,6 +34,9 @@
    }
   },
   "payment_link" : "https://www.google.com/",
+  "weight" : 22,
+  "courierCode" : "jne",
+  "courierServiceCode" : 0,
   "orderDetails" : [
     {
     "productId" : "64c5d4b92d3e63ebbd756323",

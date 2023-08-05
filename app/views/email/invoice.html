@@ -41,10 +41,19 @@
         <h2>Order Details</h2>
         {{#detailProducts}}
         <p>
-          * product name : {{name}} quantities : {{stock}} subTotal: {{price}}
+          * product name : {{name}}, quantities : {{stock}}, price: {{price}},
+          subTotal: {{subTotal}}
         </p>
         {{/detailProducts}}
-        <h3>Total : {{totalBill}}</h3>
+
+        <p>
+          Shipping provider : {{expedition.courierDetail.name}}
+          {{expedition.courierDetail.costs.service}}
+        </p>
+        <p>Shipping cost : {{expedition.courierDetail.costs.cost.value}}</p>
+        <p>Shipping etd : {{expedition.courierDetail.costs.cost.etd}}</p>
+
+        <h3>Total : {{grandTotal}}</h3>
         <h2
           style="
             font-family: Poppins, Helvetica, Arial, sans-serif;

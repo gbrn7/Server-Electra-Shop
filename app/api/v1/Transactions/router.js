@@ -2,11 +2,12 @@ const express = require('express');
 const { authenticateUser, authorizeRoles } = require('../../../middlewares/auth');
 const { index, create, find, update, destroy, readRevenue, readCountTransByStatus, readHighestSalesProduct, readLowestSalesProduct, updateShipment } = require('./controller');
 const { CheckAvailProducts, reduceStockProduct } = require('../../../middlewares/product');
+const getShipCost = require('../../../middlewares/shipmentCost');
 const router = express();
 
 router.get('/transactions', authenticateUser, authorizeRoles('superAdmin', 'admin'), index);
 
-router.post('/transactions', authenticateUser, authorizeRoles('superAdmin', 'admin', 'user'), CheckAvailProducts, reduceStockProduct, create);
+router.post('/transactions', authenticateUser, authorizeRoles('superAdmin', 'admin', 'user'), CheckAvailProducts, reduceStockProduct, getShipCost, create);
 
 router.get('/transactions/revenue', authenticateUser, authorizeRoles('superAdmin', 'admin'), readRevenue);
 

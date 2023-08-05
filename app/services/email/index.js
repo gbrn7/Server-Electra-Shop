@@ -34,6 +34,13 @@ const transactionInvoice = async (emailDestination, data) => {
   try {
     let template = fs.readFileSync('app/views/email/invoice.html', 'utf-8');
 
+    data = {
+      ...data,
+      "subTotal": function () {
+        return this.stock * this.price;
+      }
+    }
+
     let message = {
       from: gmail,
       to: emailDestination,

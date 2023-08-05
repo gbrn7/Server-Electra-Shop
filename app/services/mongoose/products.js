@@ -135,18 +135,19 @@ const chekingProductvailability = async (req) => {
 
   if (!checkingProduct) throw new NotFoundError('The product not found');
 
-  let err = [];
-  let totalBill = 0;
+  let err = [],
+    totalBill = 0,
+    totalWeight = 0;
   for (let i = 0; i < checkingProduct.length; i++) {
     for (let j = 0; j < orderDetails.length; j++) {
       if (checkingProduct[i]._id.valueOf() === orderDetails[j].productId) {
-        if (checkingProduct[i].stock < orderDetails[i].qty) {
+        if (checkingProduct[i].stock < orderDetails[j].qty) {
           err.push(checkingProduct[i]);
         } else {
-          const bill = (checkingProduct[i].price * orderDetails[j].qty);
-          totalBill += bill;
-          checkingProduct[i].price = bill;
+          totalBill += (checkingProduct[i].price * orderDetails[j].qty);
+          totalWeight += (checkingProduct[i].weight * orderDetails[j].qty);
           checkingProduct[i].stock = orderDetails[j].qty;
+          break;
         }
       }
     }
@@ -156,6 +157,7 @@ const chekingProductvailability = async (req) => {
     throw new BadRequestError(`the stock of product with ${err.map((item) => `id: ${item._id} stock: ${item.stock}`).join(', ')} is less than request`)
   } else {
     req.body.totalBill = totalBill;
+    req.body.totalWeight = totalWeight;
   }
 
   return checkingProduct;

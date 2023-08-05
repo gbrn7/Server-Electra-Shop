@@ -13,4 +13,5 @@ module.exports = {
   MidtransServerKey: process.env.MIDTRANS_SERVER_KEY,
   MidtransClientKey: process.env.MIDTRANS_CLIENT_KEY,
   MidtransIsProduction: process.env.MIDTRANS_IS_PRODUCTION,
+  RajaOngkirServerKey: process.env.RAJAONGKIR_SERVER_KEY,
 };

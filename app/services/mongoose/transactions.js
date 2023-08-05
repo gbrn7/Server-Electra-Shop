@@ -75,10 +75,15 @@ const createTransaction = async (req) => {
     orderDetails
   } = req.body;
 
+  const grandTotal = totalBill + expedition.courierDetail.costs.cost.value;
+
+  req.body.grandTotal = grandTotal;
+  // return req.body;
+
   const result = await Transactions.create({
     userId,
     address,
-    total: totalBill,
+    total: grandTotal,
     expedition,
     transaction_code: Math.floor(Math.random() * 99999999),
     transaction_status,
@@ -104,6 +109,7 @@ const createTransaction = async (req) => {
   await transactionInvoice(req.user.email, req.body);
 
   return result;
+  // return req.body;
 }
 
 const updateTransaction = async (req) => {
