@@ -133,18 +133,21 @@ const updateTransaction = async (req) => {
     await checkingRollbackProduct(check.orderDetails, orderDetails);
 
     for (let i = 0; i < check.orderDetails.length; i++) {
-      if (check.orderDetails[i].productId.valueOf() === orderDetails[i].productId
-        && check.orderDetails[i].qty !== orderDetails[i].qty) {
-        try {
-          const diff = check.orderDetails[i].qty - orderDetails[i].qty;
-          await Products.findByIdAndUpdate(check.orderDetails[i].productId.valueOf(), {
-            $inc: { stock: diff, productSold: diff * -1 }
-          });
-        } catch (error) {
-          throw new BadRequestError(error);
+
+      for (let j = 0; j < orderDetails.length; j++) {
+        if (check.orderDetails[i].productId.valueOf() === orderDetails[i].productId
+          && check.orderDetails[i].qty !== orderDetails[i].qty) {
+          try {
+            const diff = check.orderDetails[i].qty - orderDetails[i].qty;
+            await Products.findByIdAndUpdate(check.orderDetails[i].productId.valueOf(), {
+              $inc: { stock: diff, productSold: diff * -1 }
+            });
+            break;
+          } catch (error) {
+            throw new BadRequestError(error);
+          }
         }
-      } else if (check.orderDetails[i].productId.valueOf() !== orderDetails[i].productId) {
-        throw new BadRequestError('The old orderDetail id and new orderDetail id is not the same')
+
       }
     }
   }

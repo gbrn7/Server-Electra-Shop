@@ -190,18 +190,19 @@ const checkingRollbackProduct = async (oldData, newData) => {
 
   if (!checkingProduct) throw new NotFoundError('The product not found');
 
-
   let err = [];
 
   for (let i = 0; i < newData.length; i++) {
-    if (oldData[i].productId.valueOf() === newData[i].productId && oldData[i].productId.valueOf() === checkingProduct[i]._id.valueOf()) {
-      let check = checkingProduct[i].stock + oldData[i].qty - newData[i].qty;
+    for (let j = 0; j < oldData.length; j++) {
+      if (oldData[j].productId.valueOf() === newData[i].productId && oldData[j].productId.valueOf() === checkingProduct[i]._id.valueOf()) {
+        let check = checkingProduct[i].stock + oldData[j].qty - newData[i].qty;
 
-      if (check < 0) {
-        err.push(checkingProduct[i]);
+        if (check < 0) {
+          err.push(checkingProduct[i]);
+        }
+
+        break;
       }
-    } else {
-      throw new BadRequestError('the data transaction invalid');
     }
   }
 
