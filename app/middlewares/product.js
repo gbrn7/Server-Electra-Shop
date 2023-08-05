@@ -1,8 +1,8 @@
-const { chekingProductvailability, reduceProductStock } = require("../services/mongoose/products");
+const { reduceProductStock, chekingProductAvailability } = require("../services/mongoose/products");
 
 const CheckAvailProducts = async (req, res, next) => {
   try {
-    const result = await chekingProductvailability(req);
+    const result = await chekingProductAvailability(req);
 
     req.body.detailProducts = result;
 

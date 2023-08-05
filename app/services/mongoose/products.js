@@ -122,10 +122,12 @@ const deleteProduct = async (req) => {
   return result;
 }
 
-const chekingProductvailability = async (req) => {
+const chekingProductAvailability = async (req) => {
   const { orderDetails } = req.body;
 
-  const idProducts = orderDetails.map((item) => {
+  const orders = orderDetails;
+
+  const idProducts = orders.map((item) => {
     return item.productId
   });
 
@@ -139,14 +141,14 @@ const chekingProductvailability = async (req) => {
     totalBill = 0,
     totalWeight = 0;
   for (let i = 0; i < checkingProduct.length; i++) {
-    for (let j = 0; j < orderDetails.length; j++) {
-      if (checkingProduct[i]._id.valueOf() === orderDetails[j].productId) {
-        if (checkingProduct[i].stock < orderDetails[j].qty) {
+    for (let j = 0; j < orders.length; j++) {
+      if (checkingProduct[i]._id.valueOf() === orders[j].productId) {
+        if (checkingProduct[i].stock < orders[j].qty) {
           err.push(checkingProduct[i]);
         } else {
-          totalBill += (checkingProduct[i].price * orderDetails[j].qty);
-          totalWeight += (checkingProduct[i].weight * orderDetails[j].qty);
-          checkingProduct[i].stock = orderDetails[j].qty;
+          totalBill += (checkingProduct[i].price * orders[j].qty);
+          totalWeight += (checkingProduct[i].weight * orders[j].qty);
+          checkingProduct[i].stock = orders[j].qty;
           break;
         }
       }
@@ -216,7 +218,7 @@ module.exports = {
   updateProduct,
   findProduct,
   deleteProduct,
-  chekingProductvailability,
+  chekingProductAvailability,
   reduceProductStock,
   checkingRollbackProduct,
 }
