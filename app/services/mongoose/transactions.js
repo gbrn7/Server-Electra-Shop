@@ -2,7 +2,7 @@ const Transactions = require('../../api/v1/Transactions/model');
 const Products = require('../../api/v1/Products/model');
 const { NotFoundError, BadRequestError } = require('../../errors');
 const { checkingRollbackProduct } = require('./products');
-const { startOfDay } = require('date-fns')
+const { startOfDay, sub, format } = require('date-fns')
 const { endOfDay } = require('date-fns')
 const { makeMidtrans } = require('../midtrans');
 const { transactionInvoice } = require('../email');
@@ -209,7 +209,7 @@ const getCountTransByStatus = async (req) => {
   return countPendingRevenue;
 }
 
-const getHighestSalesProduct = async (req) => {
+const getHighestSalesProduct = async () => {
 
   const result = await Products.aggregate([{
     $project: {
@@ -233,7 +233,7 @@ const getHighestSalesProduct = async (req) => {
   return result;
 }
 
-const getLowestSalesProduct = async (req) => {
+const getLowestSalesProduct = async () => {
 
   const result = await Products.aggregate([{
     $project: {
@@ -276,6 +276,68 @@ const updateShipmentStatus = async (req) => {
   return result;
 }
 
+const getlastSevenDaysTrans = async () => {
+
+  const startDate = sub(startOfDay(new Date()), {
+    weeks: 1,
+  })
+  const endDate = new Date();
+
+  const result = await Transactions.aggregate([{
+    $match: {
+      updatedAt: {
+        $gt: startDate,
+        $lt: endDate,
+      }
+    }
+  }, {
+    $group: {
+      _id: {
+        $dateToString: { format: "%Y, %m, %d", date: "$updatedAt" }
+      },
+      totalRevenue: { $sum: "$total" }
+    }
+  }])
+
+  await result.map((item) => {
+    item._id = format(new Date(item._id), "eee, yyyy-MM-dd");
+    item.totalRevenue = item.totalRevenue.toLocaleString('de-DE')
+  })
+
+  return result;
+}
+
+const getlastOneYearTrans = async () => {
+
+  const startDate = sub(startOfDay(new Date()), {
+    years: 1,
+  })
+  const endDate = new Date();
+
+  const result = await Transactions.aggregate([{
+    $match: {
+      updatedAt: {
+        $gt: startDate,
+        $lt: endDate,
+      }
+    }
+  }, {
+    $group: {
+      _id: {
+        $dateToString: { format: "%Y, %m", date: "$updatedAt" }
+      },
+      totalRevenue: { $sum: "$total" }
+    }
+  }])
+
+  await result.map((item) => {
+    item._id = format(new Date(item._id), "LLL yyyy-MM-dd");
+    item.totalRevenue = item.totalRevenue.toLocaleString('de-DE')
+  })
+
+  return result;
+}
+
 
 module.exports = {
   getAllTransaction,
@@ -288,4 +350,6 @@ module.exports = {
   getHighestSalesProduct,
   getLowestSalesProduct,
   updateShipmentStatus,
+  getlastSevenDaysTrans,
+  getlastOneYearTrans,
 }

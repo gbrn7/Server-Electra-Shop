@@ -1,5 +1,5 @@
 const { StatusCodes } = require('http-status-codes');
-const { createTransaction, getAllTransaction, findTransaction, updateTransaction, deleteTransaction, getRevenueTrans, getCountTransByStatus, getHighestSalesProduct, getLowestSalesProduct, updateShipmentStatus } = require('../../../services/mongoose/transactions');
+const { createTransaction, getAllTransaction, findTransaction, updateTransaction, deleteTransaction, getRevenueTrans, getCountTransByStatus, getHighestSalesProduct, getLowestSalesProduct, updateShipmentStatus, getlastSevenDaysTrans, getlastOneYearTrans } = require('../../../services/mongoose/transactions');
 
 const index = async (req, res, next) => {
   try {
@@ -87,7 +87,7 @@ const readCountTransByStatus = async (req, res, next) => {
 
 const readHighestSalesProduct = async (req, res, next) => {
   try {
-    const result = await getHighestSalesProduct(req);
+    const result = await getHighestSalesProduct();
 
     res.status(StatusCodes.OK).json({
       data: result,
@@ -99,7 +99,7 @@ const readHighestSalesProduct = async (req, res, next) => {
 
 const readLowestSalesProduct = async (req, res, next) => {
   try {
-    const result = await getLowestSalesProduct(req);
+    const result = await getLowestSalesProduct();
 
     res.status(StatusCodes.OK).json({
       data: result,
@@ -145,6 +145,30 @@ const updateShipment = async (req, res, next) => {
   }
 }
 
+const lastSevenDaysTrans = async (req, res, next) => {
+  try {
+    const result = await getlastSevenDaysTrans();
+
+    res.status(StatusCodes.OK).json({
+      data: result,
+    })
+  } catch (error) {
+    next(error);
+  }
+}
+
+const lastOneYearTrans = async (req, res, next) => {
+  try {
+    const result = await getlastOneYearTrans();
+
+    res.status(StatusCodes.OK).json({
+      data: result,
+    })
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   index,
   create,
@@ -158,4 +182,6 @@ module.exports = {
   readNewTransactions,
   readNewSchedules,
   updateShipment,
+  lastSevenDaysTrans,
+  lastOneYearTrans,
 }
