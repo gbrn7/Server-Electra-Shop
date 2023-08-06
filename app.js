@@ -14,6 +14,7 @@ const thumbnailsRouter = require('./app/api/v1/Thumbnail/router');
 const productsRouter = require('./app/api/v1/Products/router');
 const transactionRouter = require('./app/api/v1/Transactions/router');
 const midtransRouter = require('./app/api/v1/midtrans/router');
+const googleAuthRouter = require('./app/api/v1/googleAuth/router');
 
 
 //make variable v1
@@ -39,6 +40,7 @@ app.get('/', (req, res) => {
 
 // console.log('first');
 app.use(`${v1}`, midtransRouter);
+app.use(`${v1}`, googleAuthRouter);
 app.use(`${v1}`, usersRouter);
 app.use(`${v1}`, usersRefreshToken);
 app.use(`${v1}`, thumbnailsRouter);

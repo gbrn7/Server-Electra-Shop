@@ -6,7 +6,7 @@ const userModel = new Schema({
   name: {
     type: String,
     required: [true, "The name is required"],
-    maxLength: [20, "The maximum name character is 20"],
+    maxLength: [60, "The maximum name character is 20"],
     minLength: [3, "The minimum name character is 3"]
   },
   role: {
@@ -37,6 +37,9 @@ const userModel = new Schema({
     required: 'true'
   },
   phone_num: {
+    type: String
+  },
+  googleId: {
     type: String
   }
 }, { timestamps: true },

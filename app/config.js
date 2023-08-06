@@ -14,4 +14,7 @@ module.exports = {
   MidtransClientKey: process.env.MIDTRANS_CLIENT_KEY,
   MidtransIsProduction: process.env.MIDTRANS_IS_PRODUCTION,
   RajaOngkirServerKey: process.env.RAJAONGKIR_SERVER_KEY,
+  Google_Client_Id: process.env.GOOGLE_CLIENT_ID,
+  Google_Client_Secret: process.env.GOOGLE_CLIENT_SECRET,
+  Callback_Google_Url: process.env.CALLBACK_GOOGLE_URL,
 };

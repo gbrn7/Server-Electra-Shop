@@ -1,7 +1,7 @@
 const app = require('../app');
 const debug = require('debug')('electra-shop:server');
 const http = require('http');
-
+require('../app/Oauth');
 // import package db
 const db = require('../app/db');
 

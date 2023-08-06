@@ -15,6 +15,9 @@ const signUpUser = async (req) => {
     address,
     phone_num } = req.body;
 
+  if (!email || !password || !name) throw new BadRequestError("Please Fill name, email, and password field");
+
+
   let rawResult = await Users.findOne({
     email,
     status: 'not active',
@@ -84,6 +87,57 @@ const signInUser = async (req) => {
 
   return { token, refreshToken, role: result.role, email: result.email };
 
+}
+
+const signInUserWithOauth = async (req) => {
+  const googleId = req.user.id;
+
+  const {
+    name,
+    email, } = req.user._json;
+
+  if (!email || !name) throw new BadRequestError("email and name field is required");
+
+  const result = await Users.findOne({ googleId });
+
+  if (!result) {
+    const randomOtp = createRandomOtp();
+
+    const newUser = new Users;
+    newUser.name = name;
+    newUser.email = email;
+    newUser.status = 'active';
+    newUser.googleId = googleId;
+    newUser.role = 'user';
+    newUser.otp = randomOtp;
+
+    await newUser.save({ validateBeforeSave: false });
+
+    const token = createJWT({ payload: createTokenUser(newUser) });
+
+    const refreshToken = createRefreshJWT(createTokenUser(newUser));
+
+    //create refresh token record to db
+    await createUserRefreshToken({
+      refreshToken,
+      user: newUser._id,
+    });
+
+    return { token, refreshToken, role: newUser.role, email: newUser.email };
+  } else {
+
+    const token = createJWT({ payload: createTokenUser(result) });
+
+    const refreshToken = createRefreshJWT(createTokenUser(result));
+
+    //create refresh token record to db
+    await createUserRefreshToken({
+      refreshToken,
+      user: result._id,
+    });
+
+    return { token, refreshToken, role: result.role, email: result.email };
+  }
 }
 
 const activateUser = async (req) => {
@@ -385,6 +439,7 @@ const editStatus = async (req) => {
 module.exports = {
   signUpUser,
   signInUser,
+  signInUserWithOauth,
   activateUser,
   getDetailsUser,
   createAdmin,

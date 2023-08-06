@@ -1,4 +1,4 @@
-const { activateUser, signInUser, signUpUser, createAdmin, signInAdmin, updateDataUser, getAllUser, getAllAdmin, getCountUsers, getDetailsUser, getDetailsAdmin, updateDataAdmin, editStatus } = require('../../../services/mongoose/users');
+const { activateUser, signInUser, signUpUser, createAdmin, signInAdmin, updateDataUser, getAllUser, getAllAdmin, getCountUsers, getDetailsUser, getDetailsAdmin, updateDataAdmin, editStatus, signInUserWithOauth } = require('../../../services/mongoose/users');
 const { StatusCodes } = require('http-status-codes');
 
 
@@ -28,6 +28,7 @@ const signIn = async (req, res, next) => {
     next(error);
   }
 }
+
 
 const updateUser = async (req, res, next) => {
   try {
