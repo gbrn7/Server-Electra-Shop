@@ -41,8 +41,8 @@
         <h2>Order Details</h2>
         {{#detailProducts}}
         <p>
-          * product name : {{name}}, quantities : {{stock}}, price: {{price}},
-          subTotal: {{subTotal}}
+          * product name : {{name}}, quantities : {{stock}}, price:
+          Rp.{{price}}, Rp.subTotal: {{subTotal}}
         </p>
         {{/detailProducts}}
 
@@ -50,10 +50,10 @@
           Shipping provider : {{expedition.courierDetail.name}}
           {{expedition.courierDetail.costs.service}}
         </p>
-        <p>Shipping cost : {{expedition.courierDetail.costs.cost.value}}</p>
-        <p>Shipping etd : {{expedition.courierDetail.costs.cost.etd}}</p>
+        <p>Shipping cost : Rp.{{shipingCost}}</p>
+        <p>Shipping etd : {{expedition.courierDetail.costs.cost.etd}} days</p>
 
-        <h3>Total : {{grandTotal}}</h3>
+        <h3>Total : Rp.{{grandTotal}}</h3>
         <h2
           style="
             font-family: Poppins, Helvetica, Arial, sans-serif;
