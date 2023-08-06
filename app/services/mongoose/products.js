@@ -160,10 +160,6 @@ const chekingProductAvailability = async (req) => {
     }
   }
 
-  for (let i = 0; i < checkingProduct.length; i++) {
-
-  }
-
   if (err.length !== 0) {
     throw new BadRequestError(`the stock of product with ${err.map((item) => `id: ${item._id} stock: ${item.stock}`).join(', ')} is less than request`)
   } else {
