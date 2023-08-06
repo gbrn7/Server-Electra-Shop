@@ -78,7 +78,6 @@ const createTransaction = async (req) => {
   const grandTotal = totalBill + expedition.courierDetail.costs.cost.value;
 
   req.body.grandTotal = grandTotal;
-  // return req.body;
 
   const result = await Transactions.create({
     userId,

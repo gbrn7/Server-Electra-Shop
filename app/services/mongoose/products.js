@@ -135,21 +135,30 @@ const chekingProductAvailability = async (req) => {
 
   if (!checkingProduct) throw new NotFoundError('The product not found');
 
+  for (let i = 0; i < orderDetails.length; i++) {
+    let idx = i - 1;
+    for (let j = idx + 1; j < checkingProduct.length; j++) {
+      if (orderDetails[i].productId === checkingProduct[j]._id.valueOf()) {
+        idx = j;
+      }
+    }
+
+    //swap
+    const temp = checkingProduct[i];
+    checkingProduct[i] = checkingProduct[idx];
+    checkingProduct[idx] = temp;
+  }
+
   let err = [],
     totalBill = 0,
     totalWeight = 0;
   for (let i = 0; i < checkingProduct.length; i++) {
-    for (let j = 0; j < orderDetails.length; j++) {
-      if (checkingProduct[i]._id.valueOf() === orderDetails[j].productId) {
-        if (checkingProduct[i].stock < orderDetails[j].qty) {
-          err.push(checkingProduct[i]);
-        } else {
-          totalBill += (checkingProduct[i].price * orderDetails[j].qty);
-          totalWeight += (checkingProduct[i].weight * orderDetails[j].qty);
-          checkingProduct[i].stock = orderDetails[j].qty;
-          break;
-        }
-      }
+    if (checkingProduct[i].stock < orderDetails[i].qty) {
+      err.push(checkingProduct[i]);
+    } else {
+      totalBill += (checkingProduct[i].price * orderDetails[i].qty);
+      totalWeight += (checkingProduct[i].weight * orderDetails[i].qty);
+      checkingProduct[i].stock = orderDetails[i].qty;
     }
   }
 
