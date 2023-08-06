@@ -39,8 +39,11 @@ const transactionInvoice = async (emailDestination, data) => {
       "subTotal": function () {
         return (this.stock * this.price).toLocaleString('de-DE');
       },
+      "priceOne": function () {
+        return this.price.toLocaleString('de-DE');
+      },
       "shipingCost": function () {
-        return this.expedition.courierDetail.costs.cost.value.toLocaleString('de-DE');
+        return (this.expedition.courierDetail.costs.cost.value).toLocaleString('de-DE');
       },
     }
 

@@ -135,24 +135,22 @@ const chekingProductAvailability = async (req) => {
 
   if (!checkingProduct) throw new NotFoundError('The product not found');
 
+  let err = [],
+    totalBill = 0,
+    totalWeight = 0;
+
   for (let i = 0; i < orderDetails.length; i++) {
-    let idx = i - 1;
-    for (let j = idx + 1; j < checkingProduct.length; j++) {
+    let idx = i;
+    for (let j = i; j < checkingProduct.length; j++) {
       if (orderDetails[i].productId === checkingProduct[j]._id.valueOf()) {
         idx = j;
       }
     }
-
     //swap
     const temp = checkingProduct[i];
     checkingProduct[i] = checkingProduct[idx];
     checkingProduct[idx] = temp;
-  }
-
-  let err = [],
-    totalBill = 0,
-    totalWeight = 0;
-  for (let i = 0; i < checkingProduct.length; i++) {
+    //checking stock
     if (checkingProduct[i].stock < orderDetails[i].qty) {
       err.push(checkingProduct[i]);
     } else {
@@ -160,6 +158,10 @@ const chekingProductAvailability = async (req) => {
       totalWeight += (checkingProduct[i].weight * orderDetails[i].qty);
       checkingProduct[i].stock = orderDetails[i].qty;
     }
+  }
+
+  for (let i = 0; i < checkingProduct.length; i++) {
+
   }
 
   if (err.length !== 0) {
