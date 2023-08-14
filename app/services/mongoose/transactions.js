@@ -186,12 +186,21 @@ const deleteTransaction = async (req) => {
 }
 
 const getRevenueTrans = async () => {
-  const revenue = await Transactions.aggregate([{
-    $group: {
-      _id: null,
-      grandTotal: { $sum: "$total" }
+  const revenue = await Transactions.aggregate([
+    {
+      $match: {
+        transaction_status: {
+          $regex: 'success',
+          $options: 'i'
+        }
+      }
     }
-  }])
+    , {
+      $group: {
+        _id: null,
+        grandTotal: { $sum: "$total" }
+      }
+    }])
 
   if (!revenue) throw new NotFoundError("Not Found Transactions");
 
