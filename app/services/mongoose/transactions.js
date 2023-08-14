@@ -209,7 +209,7 @@ const getCountTransByStatus = async (req) => {
     condition = { ...condition, transaction_status: { $regex: transaction_status, $options: 'i' } };
   }
   if (shipment_status) {
-    condition = { ...condition, shipment_status: { $regex: shipment_status, $options: 'i' } };
+    condition = { ...condition, 'expedition.shipment_status': { $regex: shipment_status, $options: 'i' } };
   }
 
   const countTrans = await Transactions.countDocuments(condition);
