@@ -10,12 +10,16 @@ const { transactionInvoice } = require('../email');
 const getAllTransaction = async (req) => {
   const {
     userId,
-    limit,
-    page,
     transaction_status,
     shipment_status,
     startDate,
     endDate, } = req.query;
+
+  let {
+    limit,
+    page
+  } = req.query;
+
 
   let condition = {};
 
@@ -37,6 +41,17 @@ const getAllTransaction = async (req) => {
     condition = { ...condition, updatedAt: { $lt: endOfDay(new Date(`${endDate}`)) } };
   }
 
+  if (limit) {
+    limit = parseInt(limit);
+  } else {
+    limit = 0;
+  }
+  if (page) {
+    page = parseInt(page);
+  } else {
+    page = 1;
+  }
+
   const result = await Transactions.aggregate([{
     $match: condition
   }, {
@@ -54,6 +69,11 @@ const getAllTransaction = async (req) => {
       updatedAt: 1,
       date: { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } },
     }
+  }, {
+    $skip: limit * (page - 1)
+  },
+  {
+    $limit: limit,
   }
   ]);
 
