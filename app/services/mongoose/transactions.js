@@ -199,13 +199,24 @@ const getRevenueTrans = async () => {
 }
 
 const getCountTransByStatus = async (req) => {
-  const { transaction_status } = req.body;
+  const {
+    transaction_status,
+    shipment_status } = req.query;
 
-  const countPendingRevenue = await Transactions.countDocuments({ transaction_status: { $regex: transaction_status, $options: 'i' } });
+  let condition = {};
 
-  if (!countPendingRevenue) throw new NotFoundError("Not Found Transactions");
+  if (transaction_status) {
+    condition = { ...condition, transaction_status: { $regex: transaction_status, $options: 'i' } };
+  }
+  if (shipment_status) {
+    condition = { ...condition, shipment_status: { $regex: shipment_status, $options: 'i' } };
+  }
 
-  return countPendingRevenue;
+  const countTrans = await Transactions.countDocuments(condition);
+
+  if (!countTrans) throw new NotFoundError("Not Found Transactions");
+
+  return countTrans;
 }
 
 const getHighestSalesProduct = async () => {

@@ -11,7 +11,7 @@ router.post('/transactions', authenticateUser, authorizeRoles('superAdmin', 'adm
 
 router.get('/transactions/revenue', authenticateUser, authorizeRoles('superAdmin', 'admin'), readRevenue);
 
-router.post('/transactions/countTransByStatus', authenticateUser, authorizeRoles('superAdmin', 'admin'), readCountTransByStatus);
+router.get('/transactions/countTransByStatus', authenticateUser, authorizeRoles('superAdmin', 'admin'), readCountTransByStatus);
 
 router.get('/transactions/readHighestSalesProduct', authenticateUser, authorizeRoles('superAdmin', 'admin'), readHighestSalesProduct);
 
