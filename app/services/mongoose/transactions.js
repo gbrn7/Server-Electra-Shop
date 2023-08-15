@@ -81,7 +81,7 @@ const getAllTransaction = async (req) => {
 
   const countTransactions = await Transactions.countDocuments(condition);
 
-  return { product: result, pages: Math.ceil(countTransactions / limit), total: countTransactions, page }
+  return { transactions: result, pages: Math.ceil(countTransactions / limit), total: countTransactions, page }
 }
 
 const createTransaction = async (req) => {
