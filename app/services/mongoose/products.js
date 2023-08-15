@@ -25,7 +25,7 @@ const getAllProducts = async (req) => {
 
   const countProducts = await Products.countDocuments(condition);
 
-  return { product: result, pages: Math.ceil(countProducts / limit), total: countProducts, page }
+  return { products: result, pages: Math.ceil(countProducts / limit), total: countProducts, page }
 }
 
 const createProduct = async (req) => {
