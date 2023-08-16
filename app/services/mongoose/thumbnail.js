@@ -18,6 +18,10 @@ const createThumbnail = async (req) => {
 
   const { files } = req;
 
+  files.map((item) => {
+    item.path = `uploads/${item.filename}`
+  });
+
   const result = await Thumbnail.create({ files });
 
   return result;
