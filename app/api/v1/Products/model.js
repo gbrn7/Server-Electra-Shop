@@ -27,9 +27,9 @@ const productsSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  weight: {
+  weights: {
     type: Number,
-    required: [true, 'The weight of product is required'],
+    required: [true, 'The weights of product is required'],
   },
   thumbnail: {
     type: String,
