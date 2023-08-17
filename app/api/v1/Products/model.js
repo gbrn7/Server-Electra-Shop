@@ -32,9 +32,9 @@ const productsSchema = new mongoose.Schema({
     required: [true, 'The weight of product is required'],
   },
   thumbnail: {
-    type: mongoose.Types.ObjectId,
+    type: String,
     ref: 'Thumbnail',
-    required: true,
+    required: [true, 'The thumbnail is required'],
   },
 }, {
   timestamps: true

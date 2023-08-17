@@ -39,11 +39,8 @@ const createProduct = async (req) => {
     weight,
     thumbnail } = req.body;
 
-  if (!thumbnail) throw new BadRequestError("The thumbnail is required");
 
-  await checkingThumbnail(thumbnail);
-
-  const result = await Products.create({
+  const product = new Products({
     name,
     price,
     stock,
@@ -52,9 +49,20 @@ const createProduct = async (req) => {
     productSold,
     weight,
     thumbnail
-  });
+  })
 
-  return result;
+  const error = product.validateSync();
+  if (error) {
+    throw new BadRequestError(error);
+  }
+
+  //check thumbnail
+  await checkingThumbnail(thumbnail);
+
+  //save record
+  await product.save()
+
+  return product;
 }
 
 const updateProduct = async (req) => {
