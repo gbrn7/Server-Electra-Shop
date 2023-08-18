@@ -19,7 +19,7 @@ const createThumbnail = async (req) => {
   const { files } = req;
 
   files.map((item) => {
-    item.path = `uploads/${item.filename}`
+    item.url = `uploads/${item.filename}`
   });
 
   const result = await Thumbnail.create({ files });
@@ -30,7 +30,11 @@ const createThumbnail = async (req) => {
 const checkingThumbnail = async (id) => {
   const result = await Thumbnail.findById(id);
 
+  console.log('check thumb')
+
   if (!result) throw new NotFoundError(`Thumbnail with id : ${id} not found`);
+
+  console.log('check thumb2')
 
   return result;
 }
@@ -39,7 +43,11 @@ const destroyThumbnailById = async (id) => {
 
   await checkingThumbnail(id);
 
+  console.log('destroy block 46')
+
   const result = await Thumbnail.findByIdAndDelete(id);
+
+  console.log('destroy block 50')
 
   deleteFiles(result.files);
 
@@ -50,6 +58,10 @@ const updateThumbnail = async (req) => {
 
   const { id } = req.params;
   const { files } = req;
+
+  files.map((item) => {
+    item.url = `uploads/${item.filename}`
+  });
 
   const check = await checkingThumbnail(id);
 

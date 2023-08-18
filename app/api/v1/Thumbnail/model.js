@@ -24,6 +24,9 @@ const imagesSchema = Schema({
   path: {
     type: String,
   },
+  url: {
+    type: String,
+  },
   size: {
     type: Number,
   },
