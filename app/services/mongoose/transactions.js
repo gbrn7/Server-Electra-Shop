@@ -2,7 +2,7 @@ const Transactions = require('../../api/v1/Transactions/model');
 const Products = require('../../api/v1/Products/model');
 const { NotFoundError, BadRequestError } = require('../../errors');
 const { checkingRollbackProduct } = require('./products');
-const { startOfDay, sub, format } = require('date-fns')
+const { startOfDay, sub, format, eachMonthOfInterval, compareDesc } = require('date-fns')
 const { endOfDay } = require('date-fns')
 const { makeMidtrans } = require('../midtrans');
 const { transactionInvoice } = require('../email');
@@ -21,24 +21,24 @@ const getAllTransaction = async (req) => {
   } = req.query;
 
 
-  let condition = {};
+  let match = {};
 
   if (userId) {
-    condition = { ...condition, userId };
+    match = { ...match, userId };
   } if (transaction_status) {
-    condition = { ...condition, transaction_status: { $regex: transaction_status, $options: 'i' } };
+    match = { ...match, transaction_status: { $regex: transaction_status, $options: 'i' } };
   } if (shipment_status) {
-    condition = {
-      ...condition, 'expedition.shipment_status': { $regex: shipment_status, $options: 'i' }
+    match = {
+      ...match, 'expedition.shipment_status': { $regex: shipment_status, $options: 'i' }
     };
   } if (startDate) {
-    condition = {
-      ...condition, updatedAt: {
+    match = {
+      ...match, updatedAt: {
         $gt: startOfDay(new Date(`${startDate}`)),
       }
     };
   } if (endDate) {
-    condition = { ...condition, updatedAt: { $lt: endOfDay(new Date(`${endDate}`)) } };
+    match = { ...match, updatedAt: { $lt: endOfDay(new Date(`${endDate}`)) } };
   }
 
   if (limit) {
@@ -53,11 +53,12 @@ const getAllTransaction = async (req) => {
   }
 
   const result = await Transactions.aggregate([{
-    $match: condition
+    $match: match
   }, {
     $project: {
       _id: 1,
       userId: 1,
+      total: 1,
       address: 1,
       expedition: 1,
       transaction_code: 1,
@@ -69,7 +70,13 @@ const getAllTransaction = async (req) => {
       updatedAt: 1,
       date: { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } },
     }
-  }, {
+  },
+  {
+    $sort: {
+      _id: -1
+    }
+  },
+  {
     $skip: limit * (page - 1)
   },
   {
@@ -79,7 +86,7 @@ const getAllTransaction = async (req) => {
 
   if (!result || result.length === 0) throw new NotFoundError('transaction not Found');
 
-  const countTransactions = await Transactions.countDocuments(condition);
+  const countTransactions = await Transactions.countDocuments(match);
 
   return { transactions: result, pages: Math.ceil(countTransactions / limit), total: countTransactions, page }
 }
@@ -320,14 +327,15 @@ const getlastSevenDaysTrans = async () => {
   const startDate = sub(startOfDay(new Date()), {
     weeks: 1,
   })
-  const endDate = new Date();
+  const endDate = endOfDay(new Date());
 
-  const result = await Transactions.aggregate([{
+  const data = await Transactions.aggregate([{
     $match: {
       updatedAt: {
         $gt: startDate,
         $lt: endDate,
-      }
+      },
+      transaction_status: 'success',
     }
   }, {
     $group: {
@@ -338,10 +346,23 @@ const getlastSevenDaysTrans = async () => {
     }
   }])
 
-  await result.map((item) => {
-    item._id = format(new Date(item._id), "eee, yyyy-MM-dd");
-    item.totalRevenue = item.totalRevenue.toLocaleString('de-DE')
-  })
+  const result = [];
+
+  for (let i = 0, j = 0; i < 7; i++) {
+    const formatedDate = format(sub(new Date(), { days: i }), 'yyyy, MM, dd');
+    if (formatedDate === data[j]?._id) {
+      result.push({
+        label: format(new Date(formatedDate), 'EEE yyyy, MM, dd'),
+        data: data[j].totalRevenue
+      })
+      j++;
+    } else {
+      result.push({
+        label: format(new Date(formatedDate), 'EEE yyyy, MM, dd'),
+        data: 0,
+      })
+    }
+  }
 
   return result;
 }
@@ -351,28 +372,46 @@ const getlastOneYearTrans = async () => {
   const startDate = sub(startOfDay(new Date()), {
     years: 1,
   })
-  const endDate = new Date();
+  const endDate = endOfDay(new Date());
 
-  const result = await Transactions.aggregate([{
+
+  const data = await Transactions.aggregate([{
     $match: {
       updatedAt: {
         $gt: startDate,
         $lt: endDate,
-      }
+      },
+      transaction_status: 'success',
+    }
+  }, {
+    $sort: {
+      updatedAt: -1,
     }
   }, {
     $group: {
       _id: {
-        $dateToString: { format: "%Y, %m", date: "$updatedAt" }
+        $dateToString: { format: "%Y-%m", date: "$updatedAt" }
       },
       totalRevenue: { $sum: "$total" }
     }
   }])
 
-  await result.map((item) => {
-    item._id = format(new Date(item._id), "LLL yyyy-MM-dd");
-    item.totalRevenue = item.totalRevenue.toLocaleString('de-DE')
-  })
+  const result = [];
+  for (let i = 0, j = 0; i < 12; i++) {
+    const formatedDate = format(sub(new Date(), { months: i }), 'yyyy-MM');
+    if (formatedDate === data[j]?._id) {
+      result.push({
+        label: format(new Date(formatedDate), 'MMM yyyy'),
+        data: data[j].totalRevenue
+      })
+      j++;
+    } else {
+      result.push({
+        label: format(new Date(formatedDate), 'MMM yyyy'),
+        data: 0,
+      })
+    }
+  }
 
   return result;
 }

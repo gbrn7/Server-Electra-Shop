@@ -1,7 +1,6 @@
 const Products = require("../../api/v1/Products/model");
 const { NotFoundError, BadRequestError } = require("../../errors");
 const { checkingThumbnail, destroyThumbnailById } = require("./thumbnail");
-const deleteFiles = require("../../utils/deleteFiles");
 
 const getAllProducts = async (req) => {
   const { keyword, price, status, limit, page } = req.query;
@@ -18,7 +17,9 @@ const getAllProducts = async (req) => {
     condition = { ...condition, name: { $regex: status, $options: "i" } };
   }
 
-  const result = await Products.find(condition).populate("thumbnail");
+  const result = await Products.find(condition).populate("thumbnail")
+    .limit(limit)
+    .skip(limit * (page - 1));
 
   // if (!result || result.length === 0)
   //   throw new NotFoundError("Product not Found");
@@ -64,7 +65,6 @@ const createProduct = async (req) => {
 
 const updateProduct = async (req) => {
   const { id } = req.params;
-
 
   const product = await Products.findById(id).populate("thumbnail");
 
