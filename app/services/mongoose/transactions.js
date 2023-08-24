@@ -91,6 +91,115 @@ const getAllTransaction = async (req) => {
   return { transactions: result, pages: Math.ceil(countTransactions / limit), total: countTransactions, page }
 }
 
+const getSchedule = async (req) => {
+  const {
+    transaction_status,
+    shipment_status,
+    startDate,
+    endDate
+  } = req.query;
+
+  let {
+    limit,
+    page
+  } = req.query;
+
+  let match = {};
+
+  if (transaction_status) {
+    match = { ...match, transaction_status: { $regex: transaction_status, $options: 'i' } };
+  } if (shipment_status) {
+    match = {
+      ...match, 'expedition.shipment_status': { $regex: shipment_status, $options: 'i' }
+    };
+  } if (startDate) {
+    match = {
+      ...match, updatedAt: {
+        $gt: startOfDay(new Date(`${startDate}`)),
+      }
+    };
+  } if (endDate) {
+    match = { ...match, updatedAt: { $lt: endOfDay(new Date(`${endDate}`)) } };
+  }
+
+  if (limit) {
+    limit = parseInt(limit);
+  } else {
+    limit = 5;
+  }
+  if (page) {
+    page = parseInt(page);
+  } else {
+    page = 1;
+  }
+
+  const result = await Transactions.aggregate([{
+    $match: match
+  },
+  {
+    $sort: {
+      _id: -1
+    }
+  },
+  {
+    $skip: limit * (page - 1)
+  },
+  {
+    $limit: limit,
+  }, {
+    $unwind: {
+      path: '$orderDetails'
+    }
+  },
+  {
+    $lookup: {
+      from: 'products',
+      localField: 'orderDetails.productId',
+      foreignField: '_id',
+      as: 'orderDetails.product'
+    }
+  },
+  {
+    $unwind: {
+      path: '$orderDetails.product'
+    }
+  },
+  {
+    $group: {
+      _id: '$_id',
+      products: {
+        $push: '$orderDetails'
+      }
+    }
+  },
+  {
+    $lookup: {
+      from: 'transactions',
+      localField: '_id',
+      foreignField: '_id',
+      as: 'transaction'
+    }
+  },
+  {
+    $unwind: {
+      path: '$transaction'
+    }
+  },
+  {
+    $addFields: {
+      'transaction.orderDetails': '$products'
+    }
+  },
+  {
+    $replaceRoot: {
+      newRoot: '$transaction'
+    }
+  }
+  ]);
+
+  return result;
+}
+
 const createTransaction = async (req) => {
   const { userId } = req.user;
 
@@ -430,4 +539,5 @@ module.exports = {
   updateShipmentStatus,
   getlastSevenDaysTrans,
   getlastOneYearTrans,
+  getSchedule,
 }
