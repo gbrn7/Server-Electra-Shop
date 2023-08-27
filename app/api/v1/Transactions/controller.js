@@ -15,12 +15,14 @@ const index = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
+    console.log('error');
     const result = await createTransaction(req);
 
     res.status(StatusCodes.CREATED).json({
       data: result,
     });
   } catch (error) {
+    console.log(error);
     next(error);
   }
 }

@@ -16,7 +16,7 @@ const getShipmentCost = async (req) => {
       return result;
     }).catch(function (error) {
       // Aksi ketika error terjadi
-      throw new NotFoundError(error);
+      throw new NotFoundError(error?.rajaongkir?.status?.description);
     });
   }
   else if (req.body.courierCode.toLowerCase() === 'post') {
@@ -25,7 +25,7 @@ const getShipmentCost = async (req) => {
       return result;
     }).catch(function (error) {
       // Aksi ketika error terjadi
-      throw new NotFoundError(error);
+      throw new NotFoundError(error?.rajaongkir?.status?.description);
     });
   }
   else if (req.body.courierCode.toLowerCase() === 'tiki') {
@@ -34,7 +34,7 @@ const getShipmentCost = async (req) => {
       return result;
     }).catch(function (error) {
       // Aksi ketika error terjadi
-      throw new NotFoundError(error);
+      throw new NotFoundError(error?.rajaongkir?.status?.description);
     });
   }
 

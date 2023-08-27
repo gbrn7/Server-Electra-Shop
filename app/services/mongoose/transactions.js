@@ -16,8 +16,8 @@ const getAllTransaction = async (req) => {
     endDate, } = req.query;
 
   let {
-    limit,
-    page
+    limit = 5,
+    page = 1
   } = req.query;
 
 
@@ -39,17 +39,6 @@ const getAllTransaction = async (req) => {
     };
   } if (endDate) {
     match = { ...match, updatedAt: { $lt: endOfDay(new Date(`${endDate}`)) } };
-  }
-
-  if (limit) {
-    limit = parseInt(limit);
-  } else {
-    limit = 0;
-  }
-  if (page) {
-    page = parseInt(page);
-  } else {
-    page = 1;
   }
 
   const result = await Transactions.aggregate([{
@@ -77,7 +66,7 @@ const getAllTransaction = async (req) => {
     }
   },
   {
-    $skip: limit * (page - 1)
+    $skip: parseInt(limit) * (parseInt(page) - 1)
   },
   {
     $limit: limit,
@@ -100,37 +89,37 @@ const getSchedule = async (req) => {
   } = req.query;
 
   let {
-    limit,
-    page
+    limit = 3,
+    page = 1
   } = req.query;
+
 
   let match = {};
 
   if (transaction_status) {
     match = { ...match, transaction_status: { $regex: transaction_status, $options: 'i' } };
-  } if (shipment_status) {
+  }
+
+  if (shipment_status) {
     match = {
       ...match, 'expedition.shipment_status': { $regex: shipment_status, $options: 'i' }
     };
-  } if (startDate) {
+  } else {
+    match = {
+      ...match, 'expedition.shipment_status': { $not: { $regex: 'pending', $options: 'i' } }
+    };
+  }
+
+  if (startDate) {
     match = {
       ...match, updatedAt: {
         $gt: startOfDay(new Date(`${startDate}`)),
       }
     };
-  } if (endDate) {
-    match = { ...match, updatedAt: { $lt: endOfDay(new Date(`${endDate}`)) } };
   }
 
-  if (limit) {
-    limit = parseInt(limit);
-  } else {
-    limit = 5;
-  }
-  if (page) {
-    page = parseInt(page);
-  } else {
-    page = 1;
+  if (endDate) {
+    match = { ...match, updatedAt: { $lt: endOfDay(new Date(`${endDate}`)) } };
   }
 
   const result = await Transactions.aggregate([{
@@ -142,10 +131,10 @@ const getSchedule = async (req) => {
     }
   },
   {
-    $skip: limit * (page - 1)
+    $skip: parseInt(limit) * (parseInt(page) - 1)
   },
   {
-    $limit: limit,
+    $limit: parseInt(limit),
   }, {
     $unwind: {
       path: '$orderDetails'
@@ -194,10 +183,40 @@ const getSchedule = async (req) => {
     $replaceRoot: {
       newRoot: '$transaction'
     }
-  }
+  }, {
+    $lookup: {
+      from: 'users',
+      localField: 'userId',
+      foreignField: '_id',
+      as: 'userDetails'
+    }
+  }, {
+    $unwind: '$userDetails'
+  }, {
+    $project: {
+      _id: 1,
+      userId: 1,
+      total: 1,
+      address: 1,
+      expedition: 1,
+      transaction_code: 1,
+      transaction_status: 1,
+      payment_link: 1,
+      payment_token: 1,
+      orderDetails: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      userDetails: 1,
+      date: { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } },
+    }
+  },
   ]);
 
-  return result;
+  if (!result || result.length === 0) throw new NotFoundError('transaction not Found');
+
+  const countTransactions = await Transactions.countDocuments(match);
+
+  return { transactions: result, pages: Math.ceil(countTransactions / limit), total: countTransactions, page };
 }
 
 const createTransaction = async (req) => {
