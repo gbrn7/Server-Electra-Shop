@@ -69,7 +69,7 @@ const getAllTransaction = async (req) => {
     $skip: parseInt(limit) * (parseInt(page) - 1)
   },
   {
-    $limit: limit,
+    $limit: parseInt(limit),
   }
   ]);
 
