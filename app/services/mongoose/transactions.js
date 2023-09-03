@@ -219,6 +219,149 @@ const getSchedule = async (req) => {
   return { transactions: result, pages: Math.ceil(countTransactions / limit), total: countTransactions, page };
 }
 
+const getTransactionReport = async (req) => {
+  const {
+    transaction_status = 'success',
+    shipment_status,
+    startDate,
+    endDate
+  } = req.query;
+
+  let {
+    limit = 0,
+    page = 1
+  } = req.query;
+  let match = {};
+
+  if (transaction_status) {
+    match = { ...match, transaction_status: { $regex: transaction_status, $options: 'i' } };
+  }
+
+
+  if (startDate) {
+    match = {
+      ...match, updatedAt: {
+        $gt: startOfDay(new Date(`${startDate}`)),
+      }
+    };
+  }
+
+  if (endDate) {
+    match = { ...match, updatedAt: { $lt: endOfDay(new Date(`${endDate}`)) } };
+  }
+
+
+
+  const result = await Transactions.aggregate([{
+    $match: match
+  }, {
+    $sort: {
+      _id: -1
+    }
+  },
+  {
+    $group: {
+      _id: {
+        $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" }
+      },
+      qtyTrans: {
+        $count: {}
+      },
+      subTotal: {
+        $sum: "$total"
+      },
+    }
+  }
+  ])
+
+  const result2 = await Transactions.aggregate([{
+    $match: match
+  }, {
+    $sort: {
+      _id: -1
+    }
+  },
+  {
+    $unwind: {
+      path: '$orderDetails'
+    }
+  },
+  {
+    $group: {
+      _id: {
+        $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" }
+      },
+      qtyProductSales: {
+        $sum: "$orderDetails.qty"
+      },
+    }
+  }
+  ])
+
+  if (shipment_status) {
+    match = {
+      ...match, 'expedition.shipment_status': { $regex: shipment_status, $options: 'i' }
+    };
+  } else {
+    match = {
+      ...match, 'expedition.shipment_status': { $not: { $regex: 'pending', $options: 'i' } }
+    };
+  }
+
+  const result3 = await Transactions.aggregate([{
+    $match: match
+  }, {
+    $sort: {
+      _id: -1
+    }
+  },
+  {
+    $group: {
+      _id: {
+        $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" }
+      },
+      qtyShiping: {
+        $count: {}
+      },
+    }
+  }
+  ])
+
+  if (!result || result.length === 0) throw new NotFoundError('transaction not Found');
+
+
+  let grandTotal = {
+    grandTotalShiping: 0,
+    grandTotalProduct: 0,
+    grandTotalRevenue: 0,
+  }
+
+  result.map((item, index) => {
+    item.qtyProductSales = result2[index]?.qtyProductSales ? result2[index]?.qtyProductSales : 0;
+    item.qtyShiping = result3[index]?.qtyShiping ? result3[index]?.qtyShiping : 0;
+    grandTotal.grandTotalShiping += item.qtyShiping;
+    grandTotal.grandTotalProduct += item.qtyProductSales;
+    grandTotal.grandTotalRevenue += item.subTotal;
+  })
+
+  const dataLimit = result.slice(parseInt(limit) * (parseInt(page) - 1)).length > parseInt(limit)
+    ? parseInt(limit)
+    : 0;
+
+  const data = {
+    transactions: result.slice(-(parseInt(limit) * (parseInt(page) - 1))).splice(-(dataLimit)),
+    grandTotalShiping: grandTotal.grandTotalShiping,
+    grandTotalProduct: grandTotal.grandTotalProduct,
+    grandTotalRevenue: grandTotal.grandTotalRevenue,
+    pages: Math.ceil(result.length / parseInt(limit)),
+    totalItem: result.length,
+    page,
+  }
+
+  return data;
+
+}
+
 const createTransaction = async (req) => {
   const { userId } = req.user;
 
@@ -549,6 +692,7 @@ module.exports = {
   getAllTransaction,
   createTransaction,
   updateTransaction,
+  getTransactionReport,
   findTransaction,
   deleteTransaction,
   getRevenueTrans,

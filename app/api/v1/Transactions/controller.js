@@ -1,5 +1,5 @@
 const { StatusCodes } = require('http-status-codes');
-const { createTransaction, getAllTransaction, findTransaction, updateTransaction, deleteTransaction, getRevenueTrans, getCountTransByStatus, getHighestSalesProduct, getLowestSalesProduct, updateShipmentStatus, getlastSevenDaysTrans, getlastOneYearTrans, getSchedule } = require('../../../services/mongoose/transactions');
+const { createTransaction, getAllTransaction, findTransaction, updateTransaction, deleteTransaction, getRevenueTrans, getCountTransByStatus, getHighestSalesProduct, getLowestSalesProduct, updateShipmentStatus, getlastSevenDaysTrans, getlastOneYearTrans, getSchedule, getTransactionReport } = require('../../../services/mongoose/transactions');
 
 const index = async (req, res, next) => {
   try {
@@ -183,6 +183,18 @@ const getScheduleData = async (req, res, next) => {
   }
 }
 
+const getTransactionReportData = async (req, res, next) => {
+  try {
+    const result = await getTransactionReport(req);
+
+    res.status(StatusCodes.OK).json({
+      data: result,
+    })
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   index,
   create,
@@ -199,4 +211,5 @@ module.exports = {
   lastSevenDaysTrans,
   lastOneYearTrans,
   getScheduleData,
+  getTransactionReportData,
 }
