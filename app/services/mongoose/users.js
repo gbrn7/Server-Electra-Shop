@@ -260,7 +260,7 @@ const getDetailsAdmin = async (req) => {
     ]
   });
 
-  if (!rawResult) throw new NotFoundError(`admin with id ${id}`);
+  if (!rawResult) throw new NotFoundError(`admin with id ${id} not found`);
 
   const result = deleteSecretCredentials(rawResult);
 
@@ -317,7 +317,10 @@ const updateDataAdmin = async (req) => {
     name,
     email,
     address,
-    phone_num } = req.body;
+    phone_num,
+    status,
+    role
+  } = req.body;
 
   const checkId = await Users.findOne({
     _id: id,
@@ -336,10 +339,24 @@ const updateDataAdmin = async (req) => {
     email,
     address,
     phone_num,
+    status,
+    role,
   }, { new: true, runValidators: true });
 
 
   const result = deleteSecretCredentials(rawResult);
+
+  return result;
+}
+
+const deleteDataAdmin = async (req) => {
+  const { id } = req.params;
+
+  const result = await Users.findByIdAndDelete(id);
+
+  if (!result) {
+    throw new NotFoundError(`The admin with id ${id} not found`);
+  }
 
   return result;
 }
@@ -388,7 +405,8 @@ const getAllAdmin = async (req) => {
   const result = await Users.find(condition)
     .select({ password: 0, otp: 0 })
     .limit(limit)
-    .skip(limit * (page - 1));
+    .skip(limit * (page - 1))
+    .sort({ _id: -1 });
 
   if (!result || result.length === 0) throw new NotFoundError('User not Found');
 
@@ -399,7 +417,7 @@ const getAllAdmin = async (req) => {
     ],
   });
 
-  return { users: result, pages: Math.ceil(countUsers / limit), total: countUsers, page: page };
+  return { admins: result, pages: Math.ceil(countUsers / limit), total: countUsers, page: page };
 }
 
 const getCountUsers = async (req) => {
@@ -451,4 +469,5 @@ module.exports = {
   getCountUsers,
   getDetailsAdmin,
   editStatus,
+  deleteDataAdmin,
 }

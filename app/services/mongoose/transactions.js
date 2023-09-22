@@ -110,16 +110,8 @@ const getSchedule = async (req) => {
     };
   }
 
-  if (startDate) {
-    match = {
-      ...match, updatedAt: {
-        $gt: startOfDay(new Date(`${startDate}`)),
-      }
-    };
-  }
-
-  if (endDate) {
-    match = { ...match, updatedAt: { $lt: endOfDay(new Date(`${endDate}`)) } };
+  if (startDate && endDate) {
+    match = { ...match, updatedAt: { $gt: startOfDay(new Date(`${startDate}`)), $lt: endOfDay(new Date(`${endDate}`)) } };
   }
 
   const result = await Transactions.aggregate([{
@@ -238,19 +230,9 @@ const getTransactionReport = async (req) => {
   }
 
 
-  if (startDate) {
-    match = {
-      ...match, updatedAt: {
-        $gt: startOfDay(new Date(`${startDate}`)),
-      }
-    };
+  if (startDate && endDate) {
+    match = { ...match, updatedAt: { $gt: startOfDay(new Date(`${startDate}`)), $lt: endOfDay(new Date(`${endDate}`)) } };
   }
-
-  if (endDate) {
-    match = { ...match, updatedAt: { $lt: endOfDay(new Date(`${endDate}`)) } };
-  }
-
-
 
   const result = await Transactions.aggregate([{
     $match: match
@@ -334,26 +316,29 @@ const getTransactionReport = async (req) => {
     grandTotalShiping: 0,
     grandTotalProduct: 0,
     grandTotalRevenue: 0,
+    grandTotalTrans: 0,
   }
 
+
   result.map((item, index) => {
+    const temp = item.subTotal;
+    delete item.subTotal;
     item.qtyProductSales = result2[index]?.qtyProductSales ? result2[index]?.qtyProductSales : 0;
     item.qtyShiping = result3[index]?.qtyShiping ? result3[index]?.qtyShiping : 0;
+    item.subTotal = temp;
+    grandTotal.grandTotalTrans += item.qtyTrans;
     grandTotal.grandTotalShiping += item.qtyShiping;
     grandTotal.grandTotalProduct += item.qtyProductSales;
     grandTotal.grandTotalRevenue += item.subTotal;
   })
 
-  const dataLimit = result.slice(parseInt(limit) * (parseInt(page) - 1)).length > parseInt(limit)
-    ? parseInt(limit)
-    : 0;
-
   const data = {
-    transactions: result.slice(-(parseInt(limit) * (parseInt(page) - 1))).splice(-(dataLimit)),
+    pages: Math.ceil(result.length / parseInt(limit)),
+    transactionsReport: result.splice(parseInt(limit) * (parseInt(page) - 1), parseInt(limit)),
+    grandTotalTrans: grandTotal.grandTotalTrans,
     grandTotalShiping: grandTotal.grandTotalShiping,
     grandTotalProduct: grandTotal.grandTotalProduct,
     grandTotalRevenue: grandTotal.grandTotalRevenue,
-    pages: Math.ceil(result.length / parseInt(limit)),
     totalItem: result.length,
     page,
   }

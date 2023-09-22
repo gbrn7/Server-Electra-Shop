@@ -1,4 +1,4 @@
-const { activateUser, signInUser, signUpUser, createAdmin, signInAdmin, updateDataUser, getAllUser, getAllAdmin, getCountUsers, getDetailsUser, getDetailsAdmin, updateDataAdmin, editStatus, signInUserWithOauth } = require('../../../services/mongoose/users');
+const { activateUser, signInUser, signUpUser, createAdmin, signInAdmin, updateDataUser, getAllUser, getAllAdmin, getCountUsers, getDetailsUser, getDetailsAdmin, updateDataAdmin, editStatus, signInUserWithOauth, deleteDataAdmin } = require('../../../services/mongoose/users');
 const { StatusCodes } = require('http-status-codes');
 
 
@@ -169,6 +169,19 @@ const editStatusUser = async (req, res, next) => {
   }
 }
 
+const destroy = async (req, res, next) => {
+  try {
+    const result = await deleteDataAdmin(req);
+
+    res.status(StatusCodes.OK).json({
+      data: result,
+    })
+  } catch (error) {
+    next(error);
+  }
+}
+
+
 module.exports = {
   signUp,
   signIn,
@@ -184,4 +197,5 @@ module.exports = {
   getAdmins,
   countUsers,
   editStatusUser,
+  destroy,
 }

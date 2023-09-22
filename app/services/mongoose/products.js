@@ -19,10 +19,11 @@ const getAllProducts = async (req) => {
 
   const result = await Products.find(condition).populate("thumbnail")
     .limit(limit)
-    .skip(limit * (page - 1));
+    .skip(limit * (page - 1))
+    .sort({ _id: -1 });
 
-  // if (!result || result.length === 0)
-  //   throw new NotFoundError("Product not Found");
+  if (!result)
+    throw new NotFoundError("Product not Found");
 
   const countProducts = await Products.countDocuments(condition);
 
